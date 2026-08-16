@@ -150,7 +150,8 @@
       radial-gradient(circle at 85% 80%, rgba(14,165,160,0.14), transparent 45%);
       z-index:0;}
   .lock-screen > *{position:relative; z-index:1;}
-  .lock-logo{width:56px; height:56px; border-radius:16px; background:var(--grad); display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:800; color:#04140E; margin-bottom:18px;}
+  .lock-logo{width:64px; height:64px; border-radius:18px; overflow:hidden; margin-bottom:18px; box-shadow:0 8px 24px rgba(0,0,0,0.35);}
+  .lock-logo img{width:100%; height:100%; object-fit:cover; display:block;}
   .lock-screen h2{font-family:'Fraunces',serif; font-size:21px; margin:0 0 3px;}
   .lock-screen p.sub{color:var(--text-soft); font-size:12.5px; margin-top:0; margin-bottom:26px;}
   .profile-row{display:flex; gap:16px;}
@@ -159,7 +160,7 @@
   .profile-btn .nm{font-weight:700; font-size:14.5px; color:var(--text);}
   .profile-btn .nm-te{font-size:11.5px; color:var(--text-soft); margin-top:1px;}
   .profile-btn:active, .profile-btn.active{border-color:var(--accent);}
-  .pin-dots{display:flex; gap:14px; margin:20px 0 24px;}
+  .pin-dots{display:flex; justify-content:center; gap:14px; margin:20px 0 24px;}
   .pin-dots .dot{width:13px; height:13px; border-radius:50%; border:2px solid var(--text-soft);}
   .pin-dots .dot.filled{background:var(--accent); border-color:var(--accent);}
   .keypad{display:grid; grid-template-columns:repeat(3,64px); gap:14px;}
@@ -180,7 +181,7 @@
 <!-- LOCK SCREEN -->
 <div id="lockScreen" class="lock-screen">
   <div id="lockStep1">
-    <div class="lock-logo">₹</div>
+    <div class="lock-logo"><img src="icon-192.png" alt="KNR Financial Ledger"></div>
     <h2>Who's using the ledger?</h2>
     <p class="sub">ఖాతా పుస్తకం ఎవరు వాడుతున్నారు? · tap your name</p>
     <div class="profile-row">
@@ -628,6 +629,7 @@ async function submitEntry(e){
   const btn = document.getElementById('submitBtn');
   const msg = document.getElementById('entryMsg');
   btn.disabled = true;
+  msg.className='msg ok'; msg.style.display='block'; msg.textContent='Saving… · సేవ్ అవుతోంది…';
 
   const person = document.getElementById('f-person').value;
   const date = document.getElementById('f-date').value;
@@ -643,7 +645,9 @@ async function submitEntry(e){
   else row = [date, person, cat, amount, payment, notes];
 
   try{
-    await fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+    // mode:'no-cors' avoids a false "failed to fetch" error that Google Apps
+    // Script's redirect can trigger even when the save actually succeeded.
+    await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
       body: JSON.stringify({ action:'add', sheet: SHEET_NAME[entryType], row }) });
     msg.className='msg ok'; msg.textContent='Saved to your ledger. · సేవ్ అయ్యింది.';
     document.getElementById('entryForm').reset();
@@ -652,7 +656,7 @@ async function submitEntry(e){
     await loadData();
     setTimeout(()=>{ msg.className='msg'; msg.textContent=''; }, 2500);
   }catch(err){
-    msg.className='msg err'; msg.textContent='Could not save — try again. · సేవ్ కాలేదు.';
+    msg.className='msg err'; msg.textContent='Could not save — check your internet and try again. · సేవ్ కాలేదు.';
   }
   btn.disabled = false;
 }
@@ -660,7 +664,7 @@ async function submitEntry(e){
 async function deleteEntry(sheet, rowIndex){
   if(!confirm('Remove this entry? · ఈ నమోదును తీసివేయాలా?')) return;
   try{
-    await fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+    await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
       body: JSON.stringify({ action:'delete', sheet, rowIndex }) });
     await loadData();
     if(document.getElementById('view-reports').classList.contains('active')) renderReports();
@@ -682,8 +686,9 @@ async function saveBudgets(){
   const rows = document.querySelectorAll('#budgetForm .budget-row');
   const budgets = Array.from(rows).map(r=>({ category: r.dataset.cat, limit: Number(r.querySelector('.budget-input').value)||0 }));
   const msg = document.getElementById('budgetMsg');
+  msg.className='msg ok'; msg.style.display='block'; msg.textContent='Saving… · సేవ్ అవుతోంది…';
   try{
-    await fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+    await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
       body: JSON.stringify({ action:'saveBudgets', budgets }) });
     msg.className='msg ok'; msg.textContent='Budget saved. · బడ్జెట్ సేవ్ అయ్యింది.';
     await loadData();
