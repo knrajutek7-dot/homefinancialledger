@@ -38,7 +38,7 @@
   ::selection{background:var(--accent); color:#04140E;}
 
   /* ---------- Header ---------- */
-  header.top{padding:20px 18px 14px; display:flex; justify-content:space-between; align-items:flex-start;}
+  header.top{max-width:640px; margin:0 auto; padding:20px 18px 14px; display:flex; justify-content:space-between; align-items:flex-start;}
   header.top h1{font-family:'Fraunces',serif; font-weight:600; font-size:20px; margin:0; letter-spacing:-0.01em;}
   header.top .bi{display:block; font-size:12px; color:var(--text-soft); font-weight:400; margin-top:1px;}
   .user-chip{display:flex; align-items:center; gap:6px; background:var(--card); border:1px solid var(--line); border-radius:20px; padding:7px 12px 7px 7px; cursor:pointer;}
@@ -150,8 +150,8 @@
       radial-gradient(circle at 85% 80%, rgba(14,165,160,0.14), transparent 45%);
       z-index:0;}
   .lock-screen > *{position:relative; z-index:1;}
-  .lock-logo{width:64px; height:64px; border-radius:18px; overflow:hidden; margin-bottom:18px; box-shadow:0 8px 24px rgba(0,0,0,0.35);}
-  .lock-logo img{width:100%; height:100%; object-fit:cover; display:block;}
+  .lock-logo{width:min(280px, 78vw); margin-bottom:20px;}
+  .lock-logo img{width:100%; height:auto; display:block;}
   .lock-screen h2{font-family:'Fraunces',serif; font-size:21px; margin:0 0 3px;}
   .lock-screen p.sub{color:var(--text-soft); font-size:12.5px; margin-top:0; margin-bottom:26px;}
   .profile-row{display:flex; gap:16px;}
@@ -181,7 +181,7 @@
 <!-- LOCK SCREEN -->
 <div id="lockScreen" class="lock-screen">
   <div id="lockStep1">
-    <div class="lock-logo"><img src="icon-192.png" alt="KNR Financial Ledger"></div>
+    <div class="lock-logo"><img src="logo-wide.png" alt="KNR Financial Ledger"></div>
     <h2>Who's using the ledger?</h2>
     <p class="sub">ఖాతా పుస్తకం ఎవరు వాడుతున్నారు? · tap your name</p>
     <div class="profile-row">
@@ -263,6 +263,11 @@
         </div>
 
         <form id="entryForm" onsubmit="submitEntry(event)">
+          <div id="editBanner" class="hidden" style="background:rgba(245,185,68,0.12); border:1px solid var(--warn); border-radius:10px; padding:9px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; font-size:12.5px; color:var(--warn);">
+            <span>Editing an entry · నమోదును సవరిస్తున్నారు</span>
+            <button type="button" onclick="cancelEdit()" style="background:none; border:none; color:var(--warn); font-weight:700; cursor:pointer; font-size:12.5px;">Cancel</button>
+          </div>
+
           <label>Person <span class="bi">వ్యక్తి</span></label>
           <select id="f-person"></select>
 
@@ -372,6 +377,7 @@ const CATEGORIES = {
   savings: ["Bank Savings","Fixed Deposit / RD","Gold","Mutual Funds / SIP","Chit Funds","Emergency Fund","Other Investments"]
 };
 const SHEET_NAME = { income:"Income", expense:"Expenses", savings:"Savings" };
+const REVERSE_SHEET = { Income:"income", Expenses:"expense", Savings:"savings" };
 
 const PAYMENT_MODES = ["Cash","UPI","Net Banking","Credit Card"];
 const PAYMENT_MODE_TE = { "Cash":"నగదు", "UPI":"UPI", "Net Banking":"నెట్ బ్యాంకింగ్", "Credit Card":"క్రెడిట్ కార్డ్" };
@@ -461,6 +467,7 @@ function lockApp(){
 let entryType = 'income';
 let dashPersonFilter = 'all';
 let DATA = { income:[], expenses:[], savings:[], budgets:[] };
+let editingContext = null; // {sheet, rowIndex, type}
 
 function bootApp(){
   if(!API_URL){ document.getElementById('setupScreen').classList.remove('hidden'); return; }
@@ -511,6 +518,11 @@ function updateApiUrl(){
 }
 
 function setEntryType(tp){
+  if(editingContext && tp !== editingContext.type){
+    editingContext = null;
+    document.getElementById('editBanner').classList.add('hidden');
+    document.getElementById('submitBtn').innerHTML = 'Save entry<span class="bi">నమోదు సేవ్ చేయి</span>';
+  }
   entryType = tp;
   ['income','expense','savings'].forEach(x=> document.getElementById('tb-'+x).classList.toggle('active', x===tp));
   document.getElementById('f-cat-label').innerHTML = tp==='savings' ? 'Type <span class="bi">రకం</span>' : 'Source <span class="bi">మూలం</span>';
@@ -518,6 +530,38 @@ function setEntryType(tp){
   document.getElementById('subcatWrap').classList.toggle('hidden', tp !== 'expense');
   document.getElementById('paymentWrap').classList.toggle('hidden', tp === 'income');
   if(tp !== 'income') buildPaymentSelect();
+}
+
+function editEntry(sheetName, rowIndex){
+  const key = REVERSE_SHEET[sheetName];
+  const arr = key==='income' ? DATA.income : key==='expense' ? DATA.expenses : DATA.savings;
+  const row = arr.find(r=>r._rowIndex===rowIndex);
+  if(!row) return;
+
+  setEntryType(key);
+  editingContext = { sheet: sheetName, rowIndex: rowIndex, type: key };
+
+  document.getElementById('f-person').value = row.Person || currentUser;
+  document.getElementById('f-date').value = row.Date ? new Date(row.Date).toISOString().slice(0,10) : new Date().toISOString().slice(0,10);
+  document.getElementById('f-cat').value = key==='income' ? row.Source : key==='expense' ? row.Category : row.Type;
+  if(key==='expense') document.getElementById('f-subcat').value = row.SubCategory || '';
+  if(key!=='income') document.getElementById('f-payment').value = row.PaymentMode || PAYMENT_MODES[0];
+  document.getElementById('f-amount').value = row.Amount || '';
+  document.getElementById('f-notes').value = row.Notes || '';
+
+  document.getElementById('editBanner').classList.remove('hidden');
+  document.getElementById('submitBtn').innerHTML = 'Update entry<span class="bi">నమోదు నవీకరించు</span>';
+  showView('add');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function cancelEdit(){
+  editingContext = null;
+  document.getElementById('editBanner').classList.add('hidden');
+  document.getElementById('submitBtn').innerHTML = 'Save entry<span class="bi">నమోదు సేవ్ చేయి</span>';
+  document.getElementById('entryForm').reset();
+  document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+  buildPersonSelects();
 }
 
 function showView(v){
@@ -605,10 +649,10 @@ function render(){
   ].sort((a,b)=> new Date(b.Date) - new Date(a.Date));
 
   const recentEl = document.getElementById('recentList');
-  recentEl.innerHTML = all.length ? all.slice(0,6).map(r=>rowHtml(r,false)).join('') : `<div class="empty">Nothing here yet — add your first entry below.<br>ఇంకా ఏమీ లేదు.</div>`;
+  recentEl.innerHTML = all.length ? all.slice(0,6).map(r=>rowHtml(r,true)).join('') : `<div class="empty">Nothing here yet — add your first entry below.<br>ఇంకా ఏమీ లేదు.</div>`;
 }
 
-function rowHtml(r, showDelete){
+function rowHtml(r, showActions){
   const sign = r._type==='income' ? '+' : '−';
   const dateStr = r.Date ? new Date(r.Date).toLocaleDateString('en-IN',{day:'2-digit',month:'short'}) : '';
   const paymentBadge = r.PaymentMode ? `<span class="person-tag">${PAYMENT_MODE_ICON[r.PaymentMode]||''} ${r.PaymentMode}</span>` : '';
@@ -619,7 +663,7 @@ function rowHtml(r, showDelete){
     </div>
     <div class="right">
       <div class="amt ${r._type==='income'?'inc':r._type==='savings'?'sav':'exp'}">${sign}${money(r.Amount)}</div>
-      ${showDelete ? `<button class="del-btn" onclick="deleteEntry('${SHEET_NAME[r._type]}', ${r._rowIndex})">✕</button>` : ''}
+      ${showActions ? `<button class="del-btn" onclick="editEntry('${SHEET_NAME[r._type]}', ${r._rowIndex})">✎</button><button class="del-btn" onclick="deleteEntry('${SHEET_NAME[r._type]}', ${r._rowIndex})">✕</button>` : ''}
     </div>
   </div>`;
 }
@@ -647,13 +691,23 @@ async function submitEntry(e){
   try{
     // mode:'no-cors' avoids a false "failed to fetch" error that Google Apps
     // Script's redirect can trigger even when the save actually succeeded.
-    await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify({ action:'add', sheet: SHEET_NAME[entryType], row }) });
-    msg.className='msg ok'; msg.textContent='Saved to your ledger. · సేవ్ అయ్యింది.';
+    if(editingContext){
+      await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify({ action:'update', sheet: editingContext.sheet, rowIndex: editingContext.rowIndex, row }) });
+    } else {
+      await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify({ action:'add', sheet: SHEET_NAME[entryType], row }) });
+    }
+    msg.className='msg ok'; msg.textContent = editingContext ? 'Entry updated. · నవీకరించబడింది.' : 'Saved to your ledger. · సేవ్ అయ్యింది.';
+    const wasEditing = !!editingContext;
+    editingContext = null;
+    document.getElementById('editBanner').classList.add('hidden');
+    document.getElementById('submitBtn').innerHTML = 'Save entry<span class="bi">నమోదు సేవ్ చేయి</span>';
     document.getElementById('entryForm').reset();
     document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
     buildPersonSelects();
     await loadData();
+    if(wasEditing) showView('dashboard');
     setTimeout(()=>{ msg.className='msg'; msg.textContent=''; }, 2500);
   }catch(err){
     msg.className='msg err'; msg.textContent='Could not save — check your internet and try again. · సేవ్ కాలేదు.';
