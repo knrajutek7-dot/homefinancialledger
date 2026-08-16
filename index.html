@@ -28,6 +28,15 @@
     --warn:#F5B944; --danger:#FF6E6E;
     --grad: linear-gradient(135deg,#12B886 0%,#0E8F82 100%);
   }
+  body.light-theme{
+    --bg:#F3F6F3; --bg-2:#E8EDE8;
+    --card:#FFFFFF; --card-2:#EFF3EF;
+    --text:#16201A; --text-soft:#5E6E64;
+    --line:#DCE4DD;
+    --accent:#0EA96F; --accent-2:#0B8A85;
+    --warn:#B9791A; --danger:#D9463F;
+    --grad: linear-gradient(135deg,#12B886 0%,#0E8F82 100%);
+  }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{height:100%;}
   body{
@@ -111,6 +120,7 @@
   button.primary{margin-top:18px; width:100%; padding:14px; border-radius:12px; border:none; background:var(--grad); color:#04140E; font-family:inherit; font-weight:800; font-size:14.5px; cursor:pointer;}
   button.primary .bi{display:block; font-weight:600; font-size:11px; opacity:0.75;}
   button.secondary{width:100%; padding:12px; border-radius:12px; border:1.5px solid var(--line); background:transparent; color:var(--text); font-family:inherit; font-weight:700; font-size:13.5px; cursor:pointer; margin-top:8px;}
+  button.secondary .bi{display:block; font-weight:400; font-size:10.5px; opacity:0.75; margin-top:1px;}
   .msg{margin-top:10px; font-size:12.5px; padding:9px 11px; border-radius:9px; display:none;}
   .msg.ok{display:block; background:rgba(23,216,154,0.12); color:var(--accent);}
   .msg.err{display:block; background:rgba(255,110,110,0.12); color:var(--danger);}
@@ -176,6 +186,30 @@
   .install-card .t1{font-weight:800; font-size:14px;}
   .install-card .t2{font-size:11.5px; opacity:0.85; margin-top:1px;}
   .install-card button{margin-top:12px; background:#04140E; color:#fff; border:none; padding:10px 16px; border-radius:10px; font-weight:700; font-size:13px; cursor:pointer;}
+  /* ---------- Trend chart ---------- */
+  .trend-wrap{display:flex; justify-content:space-between; align-items:flex-end; height:130px; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 10px 10px; gap:6px;}
+  .trend-col{flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;}
+  .trend-bars{display:flex; gap:3px; align-items:flex-end; height:88px; width:100%; justify-content:center;}
+  .trend-bar{width:9px; border-radius:3px 3px 0 0; min-height:2px;}
+  .trend-bar.inc{background:var(--accent);}
+  .trend-bar.exp{background:var(--danger);}
+  .trend-label{font-size:10px; color:var(--text-soft); margin-top:7px;}
+  .trend-legend{display:flex; gap:16px; justify-content:center; margin-top:10px; font-size:11.5px; color:var(--text-soft);}
+  .trend-legend i{display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:5px; vertical-align:middle;}
+
+  /* ---------- Recurring bills ---------- */
+  .bill-row{display:flex; justify-content:space-between; align-items:center; padding:11px 4px; border-bottom:1px solid var(--line); font-size:13px;}
+  .bill-row .nm{font-weight:600;}
+  .bill-row .meta{font-size:11.5px; color:var(--text-soft); margin-top:1px;}
+  .due-banner{background:rgba(245,185,68,0.12); border:1px solid var(--warn); border-radius:14px; padding:12px 14px; margin-bottom:16px;}
+  .due-banner .t1{font-weight:700; font-size:13px; color:var(--warn); margin-bottom:6px;}
+  .due-item{display:flex; justify-content:space-between; align-items:center; padding:6px 0; font-size:12.5px;}
+  .due-item button{background:var(--warn); border:none; color:#2A1D00; font-weight:700; padding:5px 10px; border-radius:8px; font-size:11px; cursor:pointer;}
+
+  /* ---------- Favorites ---------- */
+  .fav-chip-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
+  .fav-chip{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:9px 12px; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;}
+  .fav-chip .rm{color:var(--text-soft); font-size:13px;}
 </style>
 </head>
 <body>
@@ -229,6 +263,8 @@
     <div id="view-dashboard" class="view active">
       <div class="chip-row" id="dashPersonFilter"></div>
 
+      <div id="dueBanner" class="due-banner hidden"></div>
+
       <div class="hero">
         <div class="hero-top">
           <div>
@@ -257,6 +293,7 @@
 
     <!-- ADD ENTRY -->
     <div id="view-add" class="view">
+      <div id="favChipRow" class="fav-chip-row hidden"></div>
       <div class="card">
         <div class="type-toggle">
           <button id="tb-income" class="active" onclick="setEntryType('income')">Income<span class="bi">ఆదాయం</span></button>
@@ -289,6 +326,11 @@
             <select id="f-payment"></select>
           </div>
 
+          <div id="splitWrap" class="hidden" style="display:flex; align-items:center; gap:10px; margin-top:14px;">
+            <input type="checkbox" id="f-split" style="width:auto; accent-color:var(--accent);">
+            <label style="margin:0; text-transform:none; font-size:13px; font-weight:600; color:var(--text);" for="f-split">Split 50/50 between both <span class="bi">సగం సగం పంచుకోండి</span></label>
+          </div>
+
           <label>Amount (₹) <span class="bi">మొత్తం</span></label>
           <input type="number" id="f-amount" min="0" step="0.01" required placeholder="0.00">
 
@@ -296,6 +338,7 @@
           <input id="f-notes">
 
           <button type="submit" class="primary" id="submitBtn">Save entry<span class="bi">నమోదు సేవ్ చేయి</span></button>
+          <button type="button" class="secondary" onclick="saveCurrentAsFavorite()">☆ Save as favorite<span class="bi">ఇష్టమైనదిగా సేవ్ చేయి</span></button>
         </form>
         <div id="entryMsg" class="msg"></div>
       </div>
@@ -313,10 +356,23 @@
     <!-- REPORTS -->
     <div id="view-reports" class="view">
       <div class="card" style="padding:14px 16px;">
-        <label>Month <span class="bi">నెల</span></label>
-        <input type="month" id="reportMonth">
+        <label style="margin-top:0;">Period <span class="bi">కాలం</span></label>
+        <div class="type-toggle" style="margin-top:0;">
+          <button id="periodMonthBtn" class="active" onclick="setReportPeriod('month')">Monthly<span class="bi">నెలవారీ</span></button>
+          <button id="periodYearBtn" onclick="setReportPeriod('year')">Yearly<span class="bi">సంవత్సరం</span></button>
+        </div>
+        <div id="reportMonthWrap">
+          <label>Month <span class="bi">నెల</span></label>
+          <input type="month" id="reportMonth">
+        </div>
+        <div id="reportYearWrap" class="hidden">
+          <label>Year <span class="bi">సంవత్సరం</span></label>
+          <input type="number" id="reportYear" min="2020" max="2100">
+        </div>
         <label>Person <span class="bi">వ్యక్తి</span></label>
         <select id="reportPerson"></select>
+        <label>Search <span class="bi">వెతకండి</span></label>
+        <input id="reportSearch" placeholder="Search notes, category, person… · వెతకండి…">
       </div>
 
       <div class="grid3">
@@ -324,6 +380,9 @@
         <div class="stat exp"><div class="k">Expenses</div><div class="v" id="repExpense">₹0</div></div>
         <div class="stat sav"><div class="k">Savings</div><div class="v" id="repSavings">₹0</div></div>
       </div>
+
+      <h2 class="section">Monthly trend<span class="bi">నెలవారీ ధోరణి</span></h2>
+      <div id="trendChart"></div>
 
       <h2 class="section">By category<span class="bi">వర్గం వారీగా</span></h2>
       <div id="repDonut"></div>
@@ -340,10 +399,38 @@
 
     <!-- SETTINGS -->
     <div id="view-settings" class="view">
+      <div class="card">
+        <label style="margin-top:0;">Appearance <span class="bi">కనిపించే తీరు</span></label>
+        <div class="type-toggle" style="margin-top:0;">
+          <button id="themeDarkBtn" class="active" onclick="setTheme('dark')">🌙 Dark<span class="bi">డార్క్</span></button>
+          <button id="themeLightBtn" onclick="setTheme('light')">☀️ Light<span class="bi">లైట్</span></button>
+        </div>
+      </div>
       <div class="card" id="installSettingsCard" style="display:none;">
         <label style="margin-top:0;">App</label>
         <button class="primary" id="installBtnSettings" onclick="triggerInstall()">📲 Install this app<span class="bi">యాప్‌ను ఇన్‌స్టాల్ చేయండి</span></button>
         <p id="iosInstallNote" class="hidden" style="font-size:12px; color:var(--text-soft); margin-top:10px;">On iPhone: tap the Share icon in Safari, then "Add to Home Screen". · iPhoneలో: Share ఐకాన్ నొక్కి "Add to Home Screen" ఎంచుకోండి.</p>
+      </div>
+      <div class="card">
+        <label style="margin-top:0;">Recurring bills <span class="bi">పునరావృత బిల్లులు</span></label>
+        <div id="recurringList"></div>
+        <div style="margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <input id="rb-name" placeholder="Name · పేరు" style="grid-column:1/3;">
+          <select id="rb-category"></select>
+          <select id="rb-person"></select>
+          <input id="rb-amount" type="number" min="0" placeholder="Amount ₹">
+          <input id="rb-dueday" type="number" min="1" max="31" placeholder="Due day (1–31)">
+          <select id="rb-payment" style="grid-column:1/3;"></select>
+        </div>
+        <button class="primary" onclick="addRecurring()">Add bill<span class="bi">బిల్లు చేర్చు</span></button>
+        <div id="recurringMsg" class="msg"></div>
+      </div>
+      <div class="card">
+        <label style="margin-top:0;">Backup & restore <span class="bi">బ్యాకప్ & పునరుద్ధరణ</span></label>
+        <button class="primary" onclick="downloadBackup()">⬇ Download backup<span class="bi">బ్యాకప్ డౌన్‌లోడ్</span></button>
+        <input type="file" id="restoreFile" accept="application/json" class="hidden" onchange="restoreBackup(event)">
+        <button class="secondary" onclick="document.getElementById('restoreFile').click()">⬆ Restore from backup file<span class="bi">బ్యాకప్ నుండి పునరుద్ధరించు</span></button>
+        <div id="backupMsg" class="msg"></div>
       </div>
       <div class="card">
         <label style="margin-top:0;">Google Apps Script Web App URL</label>
@@ -404,6 +491,19 @@ function catBI(c){ return CATEGORY_TE[c] ? `${c} · ${CATEGORY_TE[c]}` : c; }
 function personLabel(p){ return PROFILE_LABEL[p] || p; }
 
 function money(n){ n=Number(n)||0; return '₹'+n.toLocaleString('en-IN',{maximumFractionDigits:0}); }
+
+function setTheme(theme){
+  document.body.classList.toggle('light-theme', theme==='light');
+  localStorage.setItem('ledgerTheme', theme);
+  document.getElementById('themeDarkBtn').classList.toggle('active', theme==='dark');
+  document.getElementById('themeLightBtn').classList.toggle('active', theme==='light');
+}
+(function initTheme(){
+  const saved = localStorage.getItem('ledgerTheme') || 'dark';
+  document.body.classList.toggle('light-theme', saved==='light');
+  document.getElementById('themeDarkBtn')?.classList.toggle('active', saved==='dark');
+  document.getElementById('themeLightBtn')?.classList.toggle('active', saved==='light');
+})();
 
 /* ---------- LOCK / PROFILE ---------- */
 let pendingProfile = null;
@@ -468,7 +568,7 @@ function lockApp(){
 /* ---------- APP BOOT ---------- */
 let entryType = 'income';
 let dashPersonFilter = 'all';
-let DATA = { income:[], expenses:[], savings:[], budgets:[] };
+let DATA = { income:[], expenses:[], savings:[], budgets:[], recurring:[] };
 let editingContext = null; // {sheet, rowIndex, type}
 
 function bootApp(){
@@ -477,10 +577,13 @@ function bootApp(){
   document.getElementById('bottomNav').classList.remove('hidden');
   document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
   document.getElementById('reportMonth').value = new Date().toISOString().slice(0,7);
+  document.getElementById('reportYear').value = new Date().getFullYear();
   buildDashPersonFilter();
   buildPersonSelects();
+  buildRecurringSelects();
   setEntryType('income');
   setupInstallUI();
+  renderFavorites();
 
   // Show last-known data instantly (if any) while fresh data loads in the background
   const cached = localStorage.getItem('ledgerDataCache');
@@ -537,6 +640,7 @@ function setEntryType(tp){
   buildCategorySelect();
   document.getElementById('subcatWrap').classList.toggle('hidden', tp !== 'expense');
   document.getElementById('paymentWrap').classList.toggle('hidden', tp === 'income');
+  document.getElementById('splitWrap').classList.toggle('hidden', tp !== 'expense' || !!editingContext);
   if(tp !== 'income') buildPaymentSelect();
 }
 
@@ -558,6 +662,7 @@ function editEntry(sheetName, rowIndex){
   document.getElementById('f-notes').value = row.Notes || '';
 
   document.getElementById('editBanner').classList.remove('hidden');
+  document.getElementById('splitWrap').classList.add('hidden');
   document.getElementById('submitBtn').innerHTML = 'Update entry<span class="bi">నమోదు నవీకరించు</span>';
   showView('add');
   window.scrollTo({top:0, behavior:'smooth'});
@@ -578,15 +683,17 @@ function showView(v){
   document.querySelectorAll('nav.bottom button').forEach(b=>b.classList.toggle('active', b.dataset.v===v));
   if(v==='reports') renderReports();
   if(v==='budget') renderBudgetForm();
-  if(v==='settings') document.getElementById('settingsUrl').value = API_URL;
+  if(v==='settings'){ document.getElementById('settingsUrl').value = API_URL; renderRecurringList(); }
 }
 
 async function loadData(){
   try{
     const res = await fetch(API_URL);
     DATA = await res.json();
+    if(!DATA.recurring) DATA.recurring = [];
     localStorage.setItem('ledgerDataCache', JSON.stringify(DATA));
     render();
+    if(document.getElementById('view-settings').classList.contains('active')) renderRecurringList();
   }catch(err){
     if(!DATA.income.length && !DATA.expenses.length && !DATA.savings.length){
       document.getElementById('recentList').innerHTML = `<div class="empty">Couldn't load your ledger — check your internet connection.<br>ఇంటర్నెట్ కనెక్షన్ చూడండి.</div>`;
@@ -661,6 +768,8 @@ function render(){
 
   const recentEl = document.getElementById('recentList');
   recentEl.innerHTML = all.length ? all.slice(0,6).map(r=>rowHtml(r,true)).join('') : `<div class="empty">Nothing here yet — add your first entry below.<br>ఇంకా ఏమీ లేదు.</div>`;
+
+  renderDueBills();
 }
 
 function rowHtml(r, showActions){
@@ -693,19 +802,31 @@ async function submitEntry(e){
   const notes = document.getElementById('f-notes').value;
   const subcat = document.getElementById('f-subcat').value;
   const payment = entryType !== 'income' ? document.getElementById('f-payment').value : '';
-
-  let row;
-  if(entryType==='income') row = [date, person, cat, cat, amount, notes];
-  else if(entryType==='expense') row = [date, person, cat, subcat, amount, payment, notes];
-  else row = [date, person, cat, amount, payment, notes];
+  const isSplit = entryType==='expense' && !editingContext && document.getElementById('f-split').checked;
 
   try{
     // mode:'no-cors' avoids a false "failed to fetch" error that Google Apps
     // Script's redirect can trigger even when the save actually succeeded.
     if(editingContext){
+      let row;
+      if(entryType==='income') row = [date, person, cat, cat, amount, notes];
+      else if(entryType==='expense') row = [date, person, cat, subcat, amount, payment, notes];
+      else row = [date, person, cat, amount, payment, notes];
       await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
         body: JSON.stringify({ action:'update', sheet: editingContext.sheet, rowIndex: editingContext.rowIndex, row }) });
+    } else if(isSplit){
+      const half = (Number(amount)/2).toFixed(2);
+      const splitNote = notes ? `${notes} (split)` : '(split)';
+      for(const p of PROFILES){
+        const row = [date, p, cat, subcat, half, payment, splitNote];
+        await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
+          body: JSON.stringify({ action:'add', sheet: SHEET_NAME.expense, row }) });
+      }
     } else {
+      let row;
+      if(entryType==='income') row = [date, person, cat, cat, amount, notes];
+      else if(entryType==='expense') row = [date, person, cat, subcat, amount, payment, notes];
+      else row = [date, person, cat, amount, payment, notes];
       await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
         body: JSON.stringify({ action:'add', sheet: SHEET_NAME[entryType], row }) });
     }
@@ -717,6 +838,7 @@ async function submitEntry(e){
     document.getElementById('entryForm').reset();
     document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
     buildPersonSelects();
+    setEntryType(entryType);
     await loadData();
     if(wasEditing) showView('dashboard');
     setTimeout(()=>{ msg.className='msg'; msg.textContent=''; }, 2500);
@@ -763,18 +885,51 @@ async function saveBudgets(){
 
 /* ---------- REPORTS ---------- */
 let lastReportRows = [];
-function renderReports(){
-  const monthVal = document.getElementById('reportMonth').value || new Date().toISOString().slice(0,7);
-  const person = document.getElementById('reportPerson').value || 'all';
-  const inSelectedMonth = (d)=>{ if(!d) return false; return String(d).slice(0,7)===monthVal || new Date(d).toISOString().slice(0,7)===monthVal; };
+let reportPeriod = 'month';
+function setReportPeriod(p){
+  reportPeriod = p;
+  document.getElementById('periodMonthBtn').classList.toggle('active', p==='month');
+  document.getElementById('periodYearBtn').classList.toggle('active', p==='year');
+  document.getElementById('reportMonthWrap').classList.toggle('hidden', p!=='month');
+  document.getElementById('reportYearWrap').classList.toggle('hidden', p!=='year');
+  renderReports();
+}
+function matchesSearch(r, term){
+  if(!term) return true;
+  const hay = [r.Person, r.Category, r.Source, r.Type, r.SubCategory, r.PaymentMode, r.Notes].filter(Boolean).join(' ').toLowerCase();
+  return hay.includes(term);
+}
+function monthKey(d){ const dt=new Date(d); return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0'); }
 
-  const inc = filterPerson(DATA.income.filter(r=>inSelectedMonth(r.Date)), person);
-  const exp = filterPerson(DATA.expenses.filter(r=>inSelectedMonth(r.Date)), person);
-  const sav = filterPerson(DATA.savings.filter(r=>inSelectedMonth(r.Date)), person);
+function renderReports(){
+  const person = document.getElementById('reportPerson').value || 'all';
+  const search = (document.getElementById('reportSearch').value || '').trim().toLowerCase();
+
+  let inc, exp, sav;
+
+  if(search){
+    inc = filterPerson(DATA.income, person).filter(r=>matchesSearch(r, search));
+    exp = filterPerson(DATA.expenses, person).filter(r=>matchesSearch(r, search));
+    sav = filterPerson(DATA.savings, person).filter(r=>matchesSearch(r, search));
+  } else if(reportPeriod==='year'){
+    const yearVal = Number(document.getElementById('reportYear').value) || new Date().getFullYear();
+    const inYear = (d)=>{ if(!d) return false; return new Date(d).getFullYear()===yearVal; };
+    inc = filterPerson(DATA.income.filter(r=>inYear(r.Date)), person);
+    exp = filterPerson(DATA.expenses.filter(r=>inYear(r.Date)), person);
+    sav = filterPerson(DATA.savings.filter(r=>inYear(r.Date)), person);
+  } else {
+    const monthVal = document.getElementById('reportMonth').value || new Date().toISOString().slice(0,7);
+    const inSelectedMonth = (d)=>{ if(!d) return false; return String(d).slice(0,7)===monthVal || new Date(d).toISOString().slice(0,7)===monthVal; };
+    inc = filterPerson(DATA.income.filter(r=>inSelectedMonth(r.Date)), person);
+    exp = filterPerson(DATA.expenses.filter(r=>inSelectedMonth(r.Date)), person);
+    sav = filterPerson(DATA.savings.filter(r=>inSelectedMonth(r.Date)), person);
+  }
 
   document.getElementById('repIncome').textContent = money(inc.reduce((s,r)=>s+Number(r.Amount||0),0));
   document.getElementById('repExpense').textContent = money(exp.reduce((s,r)=>s+Number(r.Amount||0),0));
   document.getElementById('repSavings').textContent = money(sav.reduce((s,r)=>s+Number(r.Amount||0),0));
+
+  renderTrendChart(person);
 
   const byCat = {};
   exp.forEach(r=>{ byCat[r.Category] = (byCat[r.Category]||0) + Number(r.Amount||0); });
@@ -799,10 +954,39 @@ function renderReports(){
   lastReportRows = all;
   document.getElementById('repList').innerHTML = all.length ? all.map(r=>rowHtml(r,true)).join('') : `<div class="empty">No entries yet. · ఇంకా నమోదులు లేవు.</div>`;
 }
+
+function renderTrendChart(person){
+  const now = new Date();
+  const months = [];
+  for(let i=5;i>=0;i--){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    months.push({ key: d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'), label: d.toLocaleString('en-IN',{month:'short'}) });
+  }
+  const incByMonth = {}, expByMonth = {};
+  filterPerson(DATA.income, person).forEach(r=>{ const k=monthKey(r.Date); incByMonth[k]=(incByMonth[k]||0)+Number(r.Amount||0); });
+  filterPerson(DATA.expenses, person).forEach(r=>{ const k=monthKey(r.Date); expByMonth[k]=(expByMonth[k]||0)+Number(r.Amount||0); });
+  const maxVal = Math.max(1, ...months.map(m=>Math.max(incByMonth[m.key]||0, expByMonth[m.key]||0)));
+  const cols = months.map(m=>{
+    const inc = incByMonth[m.key]||0, exp = expByMonth[m.key]||0;
+    return `<div class="trend-col">
+      <div class="trend-bars">
+        <div class="trend-bar inc" style="height:${Math.max(3, inc/maxVal*100)}%"></div>
+        <div class="trend-bar exp" style="height:${Math.max(3, exp/maxVal*100)}%"></div>
+      </div>
+      <div class="trend-label">${m.label}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('trendChart').innerHTML = `<div class="trend-wrap">${cols}</div>
+    <div class="trend-legend"><span><i style="background:var(--accent)"></i>Income · ఆదాయం</span><span><i style="background:var(--danger)"></i>Expenses · ఖర్చులు</span></div>`;
+}
+
 document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('reportMonth')?.addEventListener('change', renderReports);
+  document.getElementById('reportYear')?.addEventListener('change', renderReports);
   document.getElementById('reportPerson')?.addEventListener('change', renderReports);
+  document.getElementById('reportSearch')?.addEventListener('input', renderReports);
 });
+
 
 function downloadCSV(){
   if(!lastReportRows.length){ alert('No entries to export. · ఎగుమతి చేయడానికి నమోదులు లేవు.'); return; }
@@ -870,6 +1054,174 @@ async function triggerInstall(){
   await deferredInstallPrompt.userChoice;
   deferredInstallPrompt = null;
   setupInstallUI();
+}
+
+/* ---------- RECURRING BILLS ---------- */
+function buildRecurringSelects(){
+  document.getElementById('rb-category').innerHTML = CATEGORIES.expense.map(c=>`<option value="${c}">${catBI(c)}</option>`).join('');
+  document.getElementById('rb-person').innerHTML = PROFILES.map(p=>`<option value="${p}">${personLabel(p)}</option>`).join('');
+  document.getElementById('rb-payment').innerHTML = PAYMENT_MODES.map(p=>`<option value="${p}">${PAYMENT_MODE_ICON[p]} ${paymentBI(p)}</option>`).join('');
+}
+function renderRecurringList(){
+  const el = document.getElementById('recurringList');
+  if(!el) return;
+  const list = DATA.recurring||[];
+  el.innerHTML = list.length ? list.map(r=>`
+    <div class="bill-row">
+      <div><div class="nm">${r.Name}</div><div class="meta">${catBI(r.Category)} · Due day ${r.DueDay} · ${personLabel(r.Person)}</div></div>
+      <div style="display:flex; align-items:center; gap:10px;"><span class="amt">${money(r.Amount)}</span><button class="del-btn" onclick="deleteRecurring(${r._rowIndex})">✕</button></div>
+    </div>`).join('') : `<div class="empty">No recurring bills yet. · పునరావృత బిల్లులు లేవు.</div>`;
+}
+async function addRecurring(){
+  const name = document.getElementById('rb-name').value.trim();
+  const category = document.getElementById('rb-category').value;
+  const person = document.getElementById('rb-person').value;
+  const amount = document.getElementById('rb-amount').value;
+  const dueDay = document.getElementById('rb-dueday').value;
+  const payment = document.getElementById('rb-payment').value;
+  const msg = document.getElementById('recurringMsg');
+  if(!name || !amount || !dueDay){
+    msg.className='msg err'; msg.style.display='block'; msg.textContent='Please fill name, amount and due day. · అన్నీ నింపండి.';
+    return;
+  }
+  const row = [name, category, amount, dueDay, person, payment];
+  msg.className='msg ok'; msg.style.display='block'; msg.textContent='Saving… · సేవ్ అవుతోంది…';
+  try{
+    await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action:'add', sheet:'Recurring', row }) });
+    document.getElementById('rb-name').value=''; document.getElementById('rb-amount').value=''; document.getElementById('rb-dueday').value='';
+    msg.className='msg ok'; msg.textContent='Bill added. · బిల్లు చేర్చబడింది.';
+    await loadData();
+    renderRecurringList();
+    setTimeout(()=>{ msg.className='msg'; msg.textContent=''; }, 2000);
+  }catch(err){ msg.className='msg err'; msg.textContent='Could not save. · సేవ్ కాలేదు.'; }
+}
+async function deleteRecurring(rowIndex){
+  if(!confirm('Remove this recurring bill? · ఈ బిల్లును తీసివేయాలా?')) return;
+  try{
+    await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action:'delete', sheet:'Recurring', rowIndex }) });
+    await loadData();
+    renderRecurringList();
+  }catch(err){ alert('Could not delete. · తీసివేయలేకపోయాం.'); }
+}
+function renderDueBills(){
+  const banner = document.getElementById('dueBanner');
+  const list = DATA.recurring||[];
+  if(!list.length){ banner.classList.add('hidden'); return; }
+  const today = new Date().getDate();
+  const dueSoon = list.filter(r=>{
+    const day = Number(r.DueDay);
+    if(!day) return false;
+    const diff = day - today;
+    return diff>=0 && diff<=5;
+  }).sort((a,b)=>Number(a.DueDay)-Number(b.DueDay));
+  if(!dueSoon.length){ banner.classList.add('hidden'); return; }
+  banner.classList.remove('hidden');
+  banner.innerHTML = `<div class="t1">📅 Upcoming bills · రాబోయే బిల్లులు</div>` +
+    dueSoon.map(r=>`<div class="due-item"><span>${r.Name} — ${money(r.Amount)} (Day ${r.DueDay})</span><button onclick="payRecurring(${r._rowIndex})">Mark paid</button></div>`).join('');
+}
+function payRecurring(rowIndex){
+  const bill = (DATA.recurring||[]).find(r=>r._rowIndex===rowIndex);
+  if(!bill) return;
+  setEntryType('expense');
+  document.getElementById('f-person').value = bill.Person;
+  document.getElementById('f-cat').value = bill.Category;
+  document.getElementById('f-subcat').value = bill.Name;
+  document.getElementById('f-payment').value = bill.PaymentMode || PAYMENT_MODES[0];
+  document.getElementById('f-amount').value = bill.Amount;
+  document.getElementById('f-notes').value = `${bill.Name} (recurring)`;
+  showView('add');
+}
+
+/* ---------- QUICK-ADD FAVORITES ---------- */
+function getFavorites(){ try{ return JSON.parse(localStorage.getItem('ledgerFavorites')||'[]'); }catch(e){ return []; } }
+function saveFavoritesList(favs){ localStorage.setItem('ledgerFavorites', JSON.stringify(favs)); }
+function renderFavorites(){
+  const wrap = document.getElementById('favChipRow');
+  if(!wrap) return;
+  const favs = getFavorites();
+  if(!favs.length){ wrap.innerHTML=''; wrap.classList.add('hidden'); return; }
+  wrap.classList.remove('hidden');
+  wrap.innerHTML = favs.map((f,i)=>`<div class="fav-chip" onclick="applyFavorite(${i})">⭐ ${f.label}<span class="rm" onclick="event.stopPropagation(); removeFavorite(${i})">✕</span></div>`).join('');
+}
+function applyFavorite(i){
+  const f = getFavorites()[i];
+  if(!f) return;
+  setEntryType(f.type);
+  document.getElementById('f-person').value = f.person;
+  document.getElementById('f-cat').value = f.category;
+  if(f.type==='expense') document.getElementById('f-subcat').value = f.subcategory || '';
+  if(f.type!=='income') document.getElementById('f-payment').value = f.paymentMode || PAYMENT_MODES[0];
+  document.getElementById('f-amount').value = f.amount || '';
+  document.getElementById('f-notes').value = f.notes || '';
+}
+function removeFavorite(i){
+  const favs = getFavorites();
+  favs.splice(i,1);
+  saveFavoritesList(favs);
+  renderFavorites();
+}
+function saveCurrentAsFavorite(){
+  const cat = document.getElementById('f-cat').value;
+  const amount = document.getElementById('f-amount').value;
+  const favorite = {
+    type: entryType,
+    person: document.getElementById('f-person').value,
+    category: cat,
+    subcategory: entryType==='expense' ? document.getElementById('f-subcat').value : '',
+    paymentMode: entryType!=='income' ? document.getElementById('f-payment').value : '',
+    amount: amount,
+    notes: document.getElementById('f-notes').value,
+    label: `${cat}${amount ? ' · ₹'+amount : ''}`
+  };
+  const favs = getFavorites();
+  favs.push(favorite);
+  saveFavoritesList(favs);
+  renderFavorites();
+}
+
+/* ---------- BACKUP & RESTORE ---------- */
+function downloadBackup(){
+  const backup = {
+    exportedAt: new Date().toISOString(),
+    income: DATA.income, expenses: DATA.expenses, savings: DATA.savings,
+    budgets: DATA.budgets, recurring: DATA.recurring
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `knr-ledger-backup-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+async function restoreBackup(evt){
+  const file = evt.target.files[0];
+  if(!file) return;
+  const msg = document.getElementById('backupMsg');
+  try{
+    const text = await file.text();
+    const backup = JSON.parse(text);
+    const proceed = confirm('This will ADD the backed-up entries back into your sheet (existing entries are kept, not removed). Continue? · ఇది బ్యాకప్ నమోదులను తిరిగి చేరుస్తుంది. కొనసాగించాలా?');
+    if(!proceed){ evt.target.value=''; return; }
+
+    function toRows(list, headers){
+      return (list||[]).map(obj => headers.map(h => obj.hasOwnProperty(h) ? obj[h] : ''));
+    }
+    const sheets = {
+      Income: toRows(backup.income, ['Date','Person','Source','Category','Amount','Notes']),
+      Expenses: toRows(backup.expenses, ['Date','Person','Category','SubCategory','Amount','PaymentMode','Notes']),
+      Savings: toRows(backup.savings, ['Date','Person','Type','Amount','PaymentMode','Notes'])
+    };
+    msg.className='msg ok'; msg.style.display='block'; msg.textContent='Restoring… · పునరుద్ధరిస్తోంది…';
+    await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action:'restoreBulk', sheets }) });
+    msg.className='msg ok'; msg.textContent='Restore sent — check your sheet in a moment. · పునరుద్ధరణ పంపబడింది.';
+    await loadData();
+  }catch(err){
+    msg.className='msg err'; msg.style.display='block'; msg.textContent="Could not read that backup file. · ఫైల్ చదవలేకపోయాం.";
+  }
+  evt.target.value='';
 }
 
 if('serviceWorker' in navigator){
