@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Our Home Ledger · మన గృహ ఖాతా పుస్తకం</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0A0E1A">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Home Ledger">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://script.google.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;600;700;800&family=Noto+Sans+Telugu:wght@400;600;700&family=IBM+Plex+Mono:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0E1A; --bg-2:#0F1526;
+    --card:#141B2E; --card-2:#1B2338;
+    --text:#F4EEDD; --text-soft:#9C8F6E;
+    --line:rgba(212,167,44,0.22);
+    --accent:#E0B23D; --accent-2:#B8860B;
+    --warn:#FF9F1C; --danger:#FF5C4D;
+    --grad: linear-gradient(135deg,#EFC65E 0%,#B8860B 100%);
+    --nav-bg:rgba(10,14,26,0.82);
+    --glass-bg:rgba(20,27,46,0.55);
+    --glass-border:rgba(212,167,44,0.25);
+    --glow:0 0 22px rgba(224,178,61,0.35);
+    --glow-strong:0 0 34px rgba(224,178,61,0.55);
+  }
+  body.light-theme{
+    --bg:#F7F3E8; --bg-2:#EFE8D6;
+    --card:#FFFFFF; --card-2:#FBF6E9;
+    --text:#241C0E; --text-soft:#7A6B47;
+    --line:rgba(184,134,11,0.28);
+    --accent:#B8860B; --accent-2:#8C6600;
+    --warn:#C9720E; --danger:#C43B2E;
+    --grad: linear-gradient(135deg,#D9A62B 0%,#A8790A 100%);
+    --nav-bg:rgba(255,255,255,0.85);
+    --glass-bg:rgba(255,255,255,0.6);
+    --glass-border:rgba(184,134,11,0.28);
+    --glow:0 0 18px rgba(184,134,11,0.22);
+    --glow-strong:0 0 28px rgba(184,134,11,0.35);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    background-image:
+      radial-gradient(circle at 12% 0%, rgba(224,178,61,0.10), transparent 42%),
+      radial-gradient(circle at 92% 22%, rgba(224,178,61,0.06), transparent 40%);
+    background-attachment:fixed;
+    font-family:'Inter','Noto Sans Telugu',sans-serif; padding-bottom:78px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .hidden{display:none !important;}
+  .amt{font-family:'IBM Plex Mono',monospace; font-weight:600; letter-spacing:-0.01em;}
+  ::selection{background:var(--accent); color:#1A1206;}
+
+  /* ---------- Header ---------- */
+  header.top{max-width:640px; margin:0 auto; padding:20px 18px 14px; display:flex; justify-content:space-between; align-items:flex-start;}
+  header.top h1{font-family:'Fraunces',serif; font-weight:600; font-size:20px; margin:0; letter-spacing:-0.01em;}
+  header.top .bi{display:block; font-size:12px; color:var(--text-soft); font-weight:400; margin-top:1px;}
+  .user-chip{display:flex; align-items:center; gap:6px; background:var(--card); border:1px solid var(--line); border-radius:4px; padding:7px 12px 7px 7px; cursor:pointer;}
+  .user-chip .av{width:24px; height:24px; border-radius:50%; background:var(--grad); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#1A1206;}
+  .user-chip .nm{font-size:12.5px; font-weight:600;}
+
+  .wrap{max-width:640px; margin:0 auto; padding:6px 16px 10px;}
+
+  /* ---------- Hero balance card ---------- */
+  .hero{background:var(--grad); border-radius:3px; padding:22px 22px 24px; margin-bottom:16px; position:relative; overflow:hidden; color:#1A1206; box-shadow:var(--glow-strong);}
+  .hero::after{content:""; position:absolute; right:-40px; top:-40px; width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,0.08);}
+  .hero-top{display:flex; justify-content:space-between; align-items:flex-start; position:relative;}
+  .hero .label{font-size:12px; opacity:0.85; text-transform:uppercase; letter-spacing:0.06em; font-weight:600;}
+  .hero .bi-label{display:block; font-size:11px; opacity:0.7; text-transform:none; letter-spacing:0; margin-top:1px;}
+  .hero .value{font-family:'IBM Plex Mono',monospace; font-size:32px; font-weight:700; margin-top:6px;}
+  .hero .month{font-family:'Fraunces',serif; font-size:13px; opacity:0.9; margin-top:2px;}
+  .ring-wrap{flex-shrink:0; text-align:center;}
+  .ring-wrap .ring-caption{font-size:9.5px; opacity:0.8; margin-top:2px; text-transform:uppercase; letter-spacing:0.04em;}
+
+  /* ---------- Filter chips ---------- */
+  .chip-row{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+  .chip{border:1px solid var(--line); background:var(--card); border-radius:4px; padding:7px 14px; font-size:12.5px; font-weight:600; color:var(--text-soft); cursor:pointer;}
+  .chip.active{border-color:var(--accent); color:#1A1206; background:var(--accent); box-shadow:var(--glow);}
+
+  /* ---------- Stat cards ---------- */
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:9px; margin-bottom:18px;}
+  .stat{background:var(--glass-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--glass-border); border-radius:5px; padding:12px 8px; text-align:center;}
+  .stat .k{font-size:10px; color:var(--text-soft); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:5px; line-height:1.3;}
+  .stat .v{font-family:'IBM Plex Mono',monospace; font-size:14.5px; font-weight:700;}
+  .stat.inc .v{color:var(--accent);} .stat.exp .v{color:var(--danger);} .stat.sav .v{color:var(--warn);}
+
+  h2.section{font-family:'Fraunces',serif; font-size:16px; font-weight:600; margin:22px 0 12px; display:flex; align-items:baseline; gap:8px;}
+  h2.section .bi{font-family:'Inter'; font-weight:400; font-size:11.5px; color:var(--text-soft);}
+
+  /* ---------- Donut chart ---------- */
+  .donut-wrap{display:flex; gap:18px; align-items:center; background:var(--glass-bg); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid var(--glass-border); border-radius:3px; padding:16px;}
+  .donut{width:104px; height:104px; border-radius:50%; position:relative; flex-shrink:0;}
+  .donut::after{content:''; position:absolute; inset:17px; background:var(--bg); border-radius:50%; box-shadow:inset 0 0 12px rgba(224,178,61,0.12);}
+  .legend{flex:1; display:flex; flex-direction:column; gap:7px; min-width:0;}
+  .legend-row{display:flex; align-items:center; gap:8px; font-size:12px;}
+  .dot{width:9px; height:9px; border-radius:50%; flex-shrink:0;}
+  .lg-name{flex:1; color:var(--text-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .lg-amt{font-family:'IBM Plex Mono'; font-size:11px; flex-shrink:0;}
+
+  /* ---------- Budget bars ---------- */
+  .bar-row{margin-bottom:13px; font-size:13px;}
+  .bar-row .top-line{display:flex; justify-content:space-between; margin-bottom:5px;}
+  .bar-row .name{color:var(--text-soft); font-weight:600;}
+  .bar-row .amt{font-size:11.5px;}
+  .bar-row .track{background:var(--card-2); border-radius:3px; height:9px; overflow:hidden;}
+  .bar-row .fill{height:100%; background:var(--accent); border-radius:3px;}
+  .bar-row .fill.warn{background:var(--warn);}
+  .bar-row .fill.over{background:var(--danger);}
+
+  /* ---------- Cards / forms ---------- */
+  .card{background:var(--glass-bg); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid var(--glass-border); border-radius:3px; padding:18px; margin-bottom:16px;}
+  .type-toggle{display:flex; gap:8px; margin-bottom:16px; background:var(--bg-2); padding:4px; border-radius:5px;}
+  .type-toggle button{flex:1; padding:10px 4px; border-radius:4px; border:none; background:transparent; font-family:inherit; font-weight:700; font-size:12.5px; color:var(--text-soft); cursor:pointer; line-height:1.25;}
+  .type-toggle button .bi{display:block; font-weight:400; font-size:10px; opacity:0.85;}
+  .type-toggle button.active{background:var(--accent); color:#1A1206;}
+
+  label{display:block; font-size:11.5px; font-weight:700; color:var(--text-soft); margin:14px 0 6px; text-transform:uppercase; letter-spacing:0.03em;}
+  label .bi{text-transform:none; font-weight:400; opacity:0.8;}
+  input, select{width:100%; padding:12px 13px; border-radius:4px; border:1.5px solid var(--line); font-family:inherit; font-size:15px; background:var(--bg-2); color:var(--text);}
+  input:focus, select:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(23,216,154,0.15);}
+  select{-webkit-appearance:none; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%238CA096' stroke-width='2' fill='none'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center;}
+
+  button.primary{margin-top:18px; width:100%; padding:14px; border-radius:5px; border:none; background:var(--grad); color:#1A1206; font-family:inherit; font-weight:800; font-size:14.5px; cursor:pointer; box-shadow:var(--glow); transition:box-shadow 0.2s, transform 0.1s;}
+  button.primary:hover{box-shadow:var(--glow-strong);}
+  button.primary:active{transform:scale(0.98);}
+  button.primary .bi{display:block; font-weight:600; font-size:11px; opacity:0.75;}
+  button.secondary{width:100%; padding:12px; border-radius:5px; border:1.5px solid var(--line); background:transparent; color:var(--text); font-family:inherit; font-weight:700; font-size:13.5px; cursor:pointer; margin-top:8px;}
+  button.secondary .bi{display:block; font-weight:400; font-size:10.5px; opacity:0.75; margin-top:1px;}
+  .msg{margin-top:10px; font-size:12.5px; padding:9px 11px; border-radius:4px; display:none;}
+  .msg.ok{display:block; background:rgba(23,216,154,0.12); color:var(--accent);}
+  .msg.err{display:block; background:rgba(255,110,110,0.12); color:var(--danger);}
+
+  /* ---------- Ledger rows ---------- */
+  .ledger-row{display:flex; justify-content:space-between; align-items:center; padding:12px 4px; border-bottom:1px solid var(--line); font-size:13.5px;}
+  .ledger-row .left .cat{font-weight:600;}
+  .ledger-row .left .sub{font-size:11.5px; color:var(--text-soft); margin-top:1px;}
+  .ledger-row .right{display:flex; align-items:center; gap:10px;}
+  .ledger-row .right .amt.inc{color:var(--accent);} .ledger-row .right .amt.sav{color:var(--warn);} .ledger-row .right .amt.exp{color:var(--danger);}
+  .del-btn{border:none; background:none; color:var(--text-soft); cursor:pointer; font-size:15px; padding:2px 6px;}
+  .empty{text-align:center; color:var(--text-soft); padding:28px 10px; font-size:13px;}
+  .person-tag{display:inline-block; font-size:10px; font-weight:700; padding:1.5px 8px; border-radius:4px; background:var(--card-2); color:var(--text-soft); margin-left:6px;}
+
+  /* ---------- Budget rows ---------- */
+  .budget-row{margin-bottom:12px; background:var(--glass-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--glass-border); border-radius:5px; padding:14px 16px;}
+  .budget-row .row-top{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .budget-row .dot{width:11px; height:11px; border-radius:50%; flex-shrink:0;}
+  .budget-row .name{font-weight:700; font-size:14px; display:block; color:var(--text);}
+  .budget-row .bi{display:block; font-size:11px; color:var(--text-soft); font-weight:400; margin-top:1px;}
+  .budget-row .amount-line{display:flex; align-items:center; gap:0;}
+  .budget-row .amount-line input{flex:1; min-width:0;}
+  .budget-row .rupee-prefix{background:var(--bg-2); border:1.5px solid var(--line); border-right:none; border-radius:4px 0 0 4px; padding:12px 0 12px 14px; font-weight:700; color:var(--text-soft); font-size:15px;}
+  .budget-row input{border-radius:0 4px 4px 0; border-left:none;}
+  .budget-row .spent-note{font-size:11.5px; color:var(--text-soft); margin-top:8px;}
+  .budget-row .spent-note b{color:var(--text);}
+  .budget-save-bar{position:fixed; left:0; right:0; bottom:calc(60px + env(safe-area-inset-bottom)); max-width:640px; margin:0 auto; background:var(--card); border-top:1px solid var(--line); padding:12px 16px; z-index:15; box-shadow:0 -6px 16px rgba(0,0,0,0.25);}
+  .budget-save-bar button.primary{margin-top:0;}
+  .budget-save-bar .msg{margin-top:8px;}
+
+  /* ---------- Bottom nav ---------- */
+  nav.bottom{position:fixed; bottom:0; left:0; right:0; background:var(--nav-bg); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); border-top:1px solid var(--glass-border); display:flex; justify-content:space-around; padding:8px 0 calc(9px + env(safe-area-inset-bottom)); max-width:640px; margin:0 auto; box-shadow:0 -6px 24px rgba(0,0,0,0.4); z-index:20;}
+  nav.bottom button{background:none; border:none; font-family:inherit; font-size:9.5px; font-weight:700; color:var(--text); opacity:0.6; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; padding:4px 6px; line-height:1.2;}
+  nav.bottom button .ic{font-size:18px;}
+  nav.bottom button.active{color:var(--accent); opacity:1; text-shadow:0 0 12px rgba(224,178,61,0.6);}
+  nav.bottom button .bi{font-weight:400; font-size:8.5px; opacity:0.85;}
+
+  .view{display:none;} .view.active{display:block;}
+
+  /* ---------- Setup screen ---------- */
+  .setup-box{max-width:480px; margin:60px auto; padding:0 22px;}
+  .setup-box h2{font-family:'Fraunces',serif; font-size:21px;}
+  .setup-box p{font-size:13.5px; color:var(--text-soft); line-height:1.5;}
+
+  /* ---------- Lock screen ---------- */
+  .lock-screen{min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center; position:relative; overflow:hidden;}
+  .lock-screen::before{content:""; position:absolute; inset:0; background:
+      radial-gradient(circle at 20% 15%, rgba(224,178,61,0.18), transparent 45%),
+      radial-gradient(circle at 85% 80%, rgba(184,134,11,0.14), transparent 45%);
+      z-index:0;}
+  .lock-screen > *{position:relative; z-index:1;}
+  .lock-logo{width:min(280px, 78vw); margin-bottom:20px;}
+  .lock-logo img{width:100%; height:auto; display:block; filter:drop-shadow(0 0 26px rgba(224,178,61,0.4));}
+  .lock-screen h2{font-family:'Fraunces',serif; font-size:21px; margin:0 0 3px;}
+  .lock-screen p.sub{color:var(--text-soft); font-size:12.5px; margin-top:0; margin-bottom:26px;}
+  .profile-row{display:flex; gap:16px;}
+  .profile-btn{background:var(--glass-bg); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1.5px solid var(--glass-border); border-radius:3px; padding:22px 26px; cursor:pointer; font-family:inherit; transition:box-shadow 0.2s, border-color 0.2s;}
+  .profile-btn .av{width:52px; height:52px; border-radius:50%; background:var(--grad); display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:800; color:#1A1206; margin:0 auto 10px;}
+  .profile-btn .nm{font-weight:700; font-size:14.5px; color:var(--text);}
+  .profile-btn .nm-te{font-size:11.5px; color:var(--text-soft); margin-top:1px;}
+  .profile-btn:active, .profile-btn.active{border-color:var(--accent); box-shadow:var(--glow);}
+  .pin-dots{display:flex; justify-content:center; gap:14px; margin:20px 0 24px;}
+  .pin-dots .dot{width:13px; height:13px; border-radius:50%; border:2px solid var(--text-soft);}
+  .pin-dots .dot.filled{background:var(--accent); border-color:var(--accent); box-shadow:var(--glow);}
+  .keypad{display:grid; grid-template-columns:repeat(3,64px); gap:14px;}
+  .keypad button{width:64px; height:64px; border-radius:50%; border:1.5px solid var(--glass-border); background:var(--glass-bg); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); font-size:19px; font-weight:600; font-family:'IBM Plex Mono',monospace; cursor:pointer; color:var(--text); transition:box-shadow 0.15s, border-color 0.15s;}
+  .keypad button:active{background:var(--card-2); border-color:var(--accent); box-shadow:var(--glow);}
+  .keypad button.wide{font-size:12px; font-family:'Inter'; color:var(--text-soft); font-weight:700;}
+  .lock-msg{font-size:12.5px; color:var(--danger); height:18px; margin-top:-6px; margin-bottom:4px;}
+
+  /* ---------- Install card ---------- */
+  .install-card{background:var(--grad); border-radius:6px; padding:16px 18px; margin-bottom:16px; color:#1A1206;}
+  .install-card .t1{font-weight:800; font-size:14px;}
+  .install-card .t2{font-size:11.5px; opacity:0.85; margin-top:1px;}
+  .install-card button{margin-top:12px; background:#1A1206; color:#fff; border:none; padding:10px 16px; border-radius:4px; font-weight:700; font-size:13px; cursor:pointer;}
+  /* ---------- Trend chart ---------- */
+  .trend-wrap{display:flex; justify-content:space-between; align-items:flex-end; height:130px; background:var(--glass-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--glass-border); border-radius:6px; padding:14px 10px 10px; gap:6px;}
+  .trend-col{flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;}
+  .trend-bars{display:flex; gap:3px; align-items:flex-end; height:88px; width:100%; justify-content:center;}
+  .trend-bar{width:9px; border-radius:3px 3px 0 0; min-height:2px;}
+  .trend-bar.inc{background:var(--accent);}
+  .trend-bar.exp{background:var(--danger);}
+  .trend-label{font-size:10px; color:var(--text-soft); margin-top:7px;}
+  .trend-legend{display:flex; gap:16px; justify-content:center; margin-top:10px; font-size:11.5px; color:var(--text-soft);}
+  .trend-legend i{display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:5px; vertical-align:middle;}
+
+  /* ---------- Recurring bills ---------- */
+  .bill-row{display:flex; justify-content:space-between; align-items:center; padding:11px 4px; border-bottom:1px solid var(--line); font-size:13px;}
+  .bill-row .nm{font-weight:600;}
+  .bill-row .meta{font-size:11.5px; color:var(--text-soft); margin-top:1px;}
+  .due-banner{background:rgba(245,185,68,0.12); border:1px solid var(--warn); border-radius:5px; padding:12px 14px; margin-bottom:16px;}
+  .due-banner .t1{font-weight:700; font-size:13px; color:var(--warn); margin-bottom:6px;}
+  .due-item{display:flex; justify-content:space-between; align-items:center; padding:6px 0; font-size:12.5px;}
+  .due-item button{background:var(--warn); border:none; color:#2A1D00; font-weight:700; padding:5px 10px; border-radius:3px; font-size:11px; cursor:pointer;}
+
+  /* ---------- Favorites ---------- */
+  .fav-chip-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
+  .fav-chip{background:var(--glass-bg); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:5px; padding:9px 12px; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px;}
+  .fav-chip .rm{color:var(--text-soft); font-size:13px;}
+</style>
+</head>
+<body>
+
+<!-- LOCK SCREEN -->
+<div id="lockScreen" class="lock-screen">
+  <div id="lockStep1">
+    <div class="lock-logo"><img src="logo-wide.png" alt="KNR Financial Ledger"></div>
+    <h2>Who's using the ledger?</h2>
+    <p class="sub">ఖాతా పుస్తకం ఎవరు వాడుతున్నారు? · tap your name</p>
+    <div class="profile-row">
+      <button class="profile-btn" onclick="pickProfile('Nagaraju')"><div class="av">N</div><div class="nm">Nagaraju</div><div class="nm-te">నాగరాజు</div></button>
+      <button class="profile-btn" onclick="pickProfile('Vimala')"><div class="av">V</div><div class="nm">Vimala</div><div class="nm-te">విమల</div></button>
+    </div>
+  </div>
+  <div id="lockStep2" class="hidden">
+    <h2 id="pinHeading">Enter your PIN</h2>
+    <p class="sub" id="pinSub">4-digit PIN · పిన్ నమోదు చేయండి</p>
+    <div class="pin-dots" id="pinDots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <div class="lock-msg" id="lockMsg"></div>
+    <div class="keypad">
+      <button onclick="pinPress('1')">1</button><button onclick="pinPress('2')">2</button><button onclick="pinPress('3')">3</button>
+      <button onclick="pinPress('4')">4</button><button onclick="pinPress('5')">5</button><button onclick="pinPress('6')">6</button>
+      <button onclick="pinPress('7')">7</button><button onclick="pinPress('8')">8</button><button onclick="pinPress('9')">9</button>
+      <button class="wide" onclick="pinBack()">Back</button><button onclick="pinPress('0')">0</button><button class="wide" onclick="pinClear()">⌫</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETUP SCREEN -->
+<div id="setupScreen" class="setup-box hidden">
+  <h2>Let's connect your ledger</h2>
+  <p>Paste the Web App URL you got from Google Apps Script.</p>
+  <label>Google Apps Script Web App URL</label>
+  <input id="setupUrl" placeholder="https://script.google.com/macros/s/..../exec">
+  <button class="primary" onclick="saveSetup()">Save & Continue</button>
+  <div id="setupMsg" class="msg"></div>
+</div>
+
+<div id="app" class="hidden">
+  <header class="top">
+    <div>
+      <h1>Our Home Ledger<span class="bi">మన గృహ ఖాతా పుస్తకం</span></h1>
+    </div>
+    <div class="user-chip" onclick="lockApp()"><span class="av" id="userAvLetter">N</span><span class="nm" id="userChipName">—</span></div>
+  </header>
+
+  <div class="wrap">
+
+    <!-- DASHBOARD -->
+    <div id="view-dashboard" class="view active">
+      <div class="chip-row" id="dashPersonFilter"></div>
+
+      <div id="dueBanner" class="due-banner hidden"></div>
+
+      <div class="hero">
+        <div class="hero-top">
+          <div>
+            <div class="label">Net this month<span class="bi-label">ఈ నెల నికరం</span></div>
+            <div class="value" id="netValue">₹0</div>
+            <div class="month" id="monthLabel">—</div>
+          </div>
+          <div class="ring-wrap" id="ringWrap"></div>
+        </div>
+      </div>
+
+      <div id="installSlot"></div>
+
+      <div class="grid3">
+        <div class="stat inc"><div class="k">Income<br><span style="opacity:.7">ఆదాయం</span></div><div class="v" id="sumIncome">₹0</div></div>
+        <div class="stat exp"><div class="k">Expenses<br><span style="opacity:.7">ఖర్చులు</span></div><div class="v" id="sumExpense">₹0</div></div>
+        <div class="stat sav"><div class="k">Savings<br><span style="opacity:.7">పొదుపు</span></div><div class="v" id="sumSavings">₹0</div></div>
+      </div>
+
+      <h2 class="section">Expenses by category<span class="bi">వర్గం వారీగా ఖర్చులు</span></h2>
+      <div id="catDonut"></div>
+
+      <h2 class="section" style="justify-content:space-between;">
+        <span>Recent entries<span class="bi">ఇటీవలి నమోదులు</span></span>
+        <button class="secondary" style="width:auto; margin:0; padding:8px 14px; font-size:12px;" onclick="showView('reports')">View all →</button>
+      </h2>
+      <div id="recentList"></div>
+    </div>
+
+    <!-- ADD ENTRY -->
+    <div id="view-add" class="view">
+      <div id="favChipRow" class="fav-chip-row hidden"></div>
+      <div class="card">
+        <div class="type-toggle">
+          <button id="tb-income" class="active" onclick="setEntryType('income')">Income<span class="bi">ఆదాయం</span></button>
+          <button id="tb-expense" onclick="setEntryType('expense')">Expense<span class="bi">ఖర్చు</span></button>
+          <button id="tb-savings" onclick="setEntryType('savings')">Savings<span class="bi">పొదుపు</span></button>
+        </div>
+
+        <form id="entryForm" onsubmit="submitEntry(event)">
+          <div id="editBanner" class="hidden" style="background:rgba(245,185,68,0.12); border:1px solid var(--warn); border-radius:10px; padding:9px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; font-size:12.5px; color:var(--warn);">
+            <span>Editing an entry · నమోదును సవరిస్తున్నారు</span>
+            <button type="button" onclick="cancelEdit()" style="background:none; border:none; color:var(--warn); font-weight:700; cursor:pointer; font-size:12.5px;">Cancel</button>
+          </div>
+
+          <label>Person <span class="bi">వ్యక్తి</span></label>
+          <select id="f-person"></select>
+
+          <label>Date <span class="bi">తేదీ</span></label>
+          <input type="date" id="f-date" required>
+
+          <label id="f-cat-label">Source <span class="bi">మూలం</span></label>
+          <select id="f-cat" required></select>
+
+          <div id="subcatWrap" class="hidden">
+            <label>Sub-category (optional) <span class="bi">ఉప-వర్గం</span></label>
+            <input id="f-subcat">
+          </div>
+
+          <div id="paymentWrap" class="hidden">
+            <label>Payment mode <span class="bi">చెల్లింపు విధానం</span></label>
+            <select id="f-payment"></select>
+          </div>
+
+          <div id="splitWrap" class="hidden" style="display:flex; align-items:center; gap:10px; margin-top:14px;">
+            <input type="checkbox" id="f-split" style="width:auto; accent-color:var(--accent);">
+            <label style="margin:0; text-transform:none; font-size:13px; font-weight:600; color:var(--text);" for="f-split">Split 50/50 between both <span class="bi">సగం సగం పంచుకోండి</span></label>
+          </div>
+
+          <label>Amount (₹) <span class="bi">మొత్తం</span></label>
+          <input type="number" id="f-amount" min="0" step="0.01" required placeholder="0.00">
+
+          <label>Notes (optional) <span class="bi">గమనికలు</span></label>
+          <input id="f-notes">
+
+          <button type="submit" class="primary" id="submitBtn">Save entry<span class="bi">నమోదు సేవ్ చేయి</span></button>
+          <button type="button" class="secondary" onclick="saveCurrentAsFavorite()">☆ Save as favorite<span class="bi">ఇష్టమైనదిగా సేవ్ చేయి</span></button>
+        </form>
+        <div id="entryMsg" class="msg"></div>
+      </div>
+    </div>
+
+    <!-- BUDGET -->
+    <div id="view-budget" class="view">
+      <h2 class="section" style="margin-top:0;">Monthly budget by category<span class="bi">నెలవారీ బడ్జెట్</span></h2>
+      <p style="font-size:12.5px; color:var(--text-soft); margin-top:-6px;">Set a limit for each category. Leave at 0 to skip tracking it. · ప్రతి వర్గానికి పరిమితి పెట్టండి</p>
+      <div id="budgetForm" style="padding-bottom:90px;"></div>
+      <div class="budget-save-bar">
+        <button class="primary" onclick="saveBudgets()">Save budget<span class="bi">బడ్జెట్ సేవ్ చేయి</span></button>
+        <div id="budgetMsg" class="msg"></div>
+      </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div id="view-reports" class="view">
+      <div class="card" style="padding:14px 16px;">
+        <label style="margin-top:0;">Period <span class="bi">కాలం</span></label>
+        <div class="type-toggle" style="margin-top:0;">
+          <button id="periodMonthBtn" class="active" onclick="setReportPeriod('month')">Monthly<span class="bi">నెలవారీ</span></button>
+          <button id="periodYearBtn" onclick="setReportPeriod('year')">Yearly<span class="bi">సంవత్సరం</span></button>
+        </div>
+        <div id="reportMonthWrap">
+          <label>Month <span class="bi">నెల</span></label>
+          <input type="month" id="reportMonth">
+        </div>
+        <div id="reportYearWrap" class="hidden">
+          <label>Year <span class="bi">సంవత్సరం</span></label>
+          <input type="number" id="reportYear" min="2020" max="2100">
+        </div>
+        <label>Person <span class="bi">వ్యక్తి</span></label>
+        <select id="reportPerson"></select>
+        <label>Search <span class="bi">వెతకండి</span></label>
+        <input id="reportSearch" placeholder="Search notes, category, person… · వెతకండి…">
+      </div>
+
+      <div class="grid3">
+        <div class="stat inc"><div class="k">Income</div><div class="v" id="repIncome">₹0</div></div>
+        <div class="stat exp"><div class="k">Expenses</div><div class="v" id="repExpense">₹0</div></div>
+        <div class="stat sav"><div class="k">Savings</div><div class="v" id="repSavings">₹0</div></div>
+      </div>
+
+      <h2 class="section">Monthly trend<span class="bi">నెలవారీ ధోరణి</span></h2>
+      <div id="trendChart"></div>
+
+      <h2 class="section">By category<span class="bi">వర్గం వారీగా</span></h2>
+      <div id="repDonut"></div>
+
+      <h2 class="section">By payment mode<span class="bi">చెల్లింపు విధానం వారీగా</span></h2>
+      <div id="repPayment"></div>
+
+      <h2 class="section" style="justify-content:space-between;">
+        <span>All entries<span class="bi">అన్ని నమోదులు</span></span>
+        <button class="secondary" style="width:auto; margin:0; padding:8px 14px; font-size:12px;" onclick="downloadCSV()">⬇ CSV</button>
+      </h2>
+      <div id="repList"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="view-settings" class="view">
+      <div class="card">
+        <label style="margin-top:0;">Appearance <span class="bi">కనిపించే తీరు</span></label>
+        <div class="type-toggle" style="margin-top:0;">
+          <button id="themeDarkBtn" class="active" onclick="setTheme('dark')">🌙 Dark<span class="bi">డార్క్</span></button>
+          <button id="themeLightBtn" onclick="setTheme('light')">☀️ Light<span class="bi">లైట్</span></button>
+        </div>
+      </div>
+      <div class="card" id="installSettingsCard" style="display:none;">
+        <label style="margin-top:0;">App</label>
+        <button class="primary" id="installBtnSettings" onclick="triggerInstall()">📲 Install this app<span class="bi">యాప్‌ను ఇన్‌స్టాల్ చేయండి</span></button>
+        <p id="iosInstallNote" class="hidden" style="font-size:12px; color:var(--text-soft); margin-top:10px;">On iPhone: tap the Share icon in Safari, then "Add to Home Screen". · iPhoneలో: Share ఐకాన్ నొక్కి "Add to Home Screen" ఎంచుకోండి.</p>
+      </div>
+      <div class="card">
+        <label style="margin-top:0;">Recurring bills <span class="bi">పునరావృత బిల్లులు</span></label>
+        <div id="recurringList"></div>
+        <div style="margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <input id="rb-name" placeholder="Name · పేరు" style="grid-column:1/3;">
+          <select id="rb-category"></select>
+          <select id="rb-person"></select>
+          <input id="rb-amount" type="number" min="0" placeholder="Amount ₹">
+          <input id="rb-dueday" type="number" min="1" max="31" placeholder="Due day (1–31)">
+          <select id="rb-payment" style="grid-column:1/3;"></select>
+        </div>
+        <button class="primary" onclick="addRecurring()">Add bill<span class="bi">బిల్లు చేర్చు</span></button>
+        <div id="recurringMsg" class="msg"></div>
+      </div>
+      <div class="card">
+        <label style="margin-top:0;">Backup & restore <span class="bi">బ్యాకప్ & పునరుద్ధరణ</span></label>
+        <button class="primary" onclick="downloadBackup()">⬇ Download backup<span class="bi">బ్యాకప్ డౌన్‌లోడ్</span></button>
+        <input type="file" id="restoreFile" accept="application/json" class="hidden" onchange="restoreBackup(event)">
+        <button class="secondary" onclick="document.getElementById('restoreFile').click()">⬆ Restore from backup file<span class="bi">బ్యాకప్ నుండి పునరుద్ధరించు</span></button>
+        <div id="backupMsg" class="msg"></div>
+      </div>
+      <div class="card">
+        <label style="margin-top:0;">Google Apps Script Web App URL</label>
+        <input id="settingsUrl">
+        <button class="primary" onclick="updateApiUrl()">Save<span class="bi">సేవ్ చేయి</span></button>
+        <div id="settingsMsg" class="msg"></div>
+      </div>
+      <button class="secondary" onclick="lockApp()">Switch user <span style="opacity:.7">· వాడుకరిని మార్చు</span></button>
+    </div>
+
+  </div>
+</div>
+
+<nav class="bottom hidden" id="bottomNav">
+  <button class="active" data-v="dashboard" onclick="showView('dashboard')"><span class="ic">📊</span>Dashboard<span class="bi">డాష్‌బోర్డ్</span></button>
+  <button data-v="add" onclick="showView('add')"><span class="ic">✏️</span>Add<span class="bi">చేర్చు</span></button>
+  <button data-v="budget" onclick="showView('budget')"><span class="ic">🎯</span>Budget<span class="bi">బడ్జెట్</span></button>
+  <button data-v="reports" onclick="showView('reports')"><span class="ic">📜</span>Reports<span class="bi">నివేదికలు</span></button>
+  <button data-v="settings" onclick="showView('settings')"><span class="ic">⚙️</span>Settings<span class="bi">సెట్టింగ్‌లు</span></button>
+</nav>
+
+<script>
+/* ---------- CONFIG ---------- */
+const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbwXRuQY7kt3P5NsiNpdeaDE3oWsw5d4yIVy4jhqcGBOKz1KPtFB1kqsRwko98jvLUsdYA/exec';
+let API_URL = localStorage.getItem('ledgerApiUrl') || DEFAULT_API_URL;
+
+const PROFILES = ['Nagaraju','Vimala'];
+const PROFILE_LABEL = { Nagaraju:'Nagaraju', Vimala:'Vimala' };
+
+const CATEGORIES = {
+  income: ["Salary / Wages","Business Income","Rental Income","Interest / Investment Returns","Other Income"],
+  expense: ["Housing","Utilities","Groceries & Food","Transportation","Health","Education","Personal Care","Entertainment","Festivals & Gifts","Loans/EMIs","Miscellaneous"],
+  savings: ["Bank Savings","Fixed Deposit / RD","Gold","Mutual Funds / SIP","Chit Funds","Emergency Fund","Other Investments"]
+};
+const SHEET_NAME = { income:"Income", expense:"Expenses", savings:"Savings" };
+const REVERSE_SHEET = { Income:"income", Expenses:"expense", Savings:"savings" };
+
+const PAYMENT_MODES = ["Cash","UPI","Net Banking","Credit Card"];
+const PAYMENT_MODE_TE = { "Cash":"నగదు", "UPI":"UPI", "Net Banking":"నెట్ బ్యాంకింగ్", "Credit Card":"క్రెడిట్ కార్డ్" };
+const PAYMENT_MODE_ICON = { "Cash":"💵", "UPI":"📱", "Net Banking":"🏦", "Credit Card":"💳" };
+function paymentBI(p){ return PAYMENT_MODE_TE[p] ? `${p} · ${PAYMENT_MODE_TE[p]}` : p; }
+
+const CATEGORY_TE = {
+  "Salary / Wages":"జీతం / వేతనం","Business Income":"వ్యాపార ఆదాయం","Rental Income":"అద్దె ఆదాయం",
+  "Interest / Investment Returns":"వడ్డీ / పెట్టుబడి రాబడి","Other Income":"ఇతర ఆదాయం",
+  "Housing":"గృహ నిర్వహణ","Utilities":"యుటిలిటీలు","Groceries & Food":"కిరాణా & ఆహారం","Transportation":"రవాణా",
+  "Health":"ఆరోగ్యం","Education":"విద్య","Personal Care":"వ్యక్తిగత సంరక్షణ","Entertainment":"వినోదం",
+  "Festivals & Gifts":"పండుగలు & బహుమతులు","Loans/EMIs":"అప్పులు / EMIలు","Miscellaneous":"ఇతరాలు",
+  "Bank Savings":"బ్యాంక్ పొదుపు","Fixed Deposit / RD":"ఫిక్స్‌డ్ డిపాజిట్ / RD","Gold":"బంగారం",
+  "Mutual Funds / SIP":"మ్యూచువల్ ఫండ్స్ / SIP","Chit Funds":"చిట్ ఫండ్స్","Emergency Fund":"అత్యవసర నిధి","Other Investments":"ఇతర పెట్టుబడులు"
+};
+const CATEGORY_COLOR = {
+  "Housing":"#17D89A","Utilities":"#0EA5A0","Groceries & Food":"#F5B944","Transportation":"#FF6E6E",
+  "Health":"#8B7FE8","Education":"#4FA8E0","Personal Care":"#E8779F","Entertainment":"#B4D97A",
+  "Festivals & Gifts":"#E0A85C","Loans/EMIs":"#7FD1C1","Miscellaneous":"#9AA8A0"
+};
+function catBI(c){ return CATEGORY_TE[c] ? `${c} · ${CATEGORY_TE[c]}` : c; }
+function personLabel(p){ return PROFILE_LABEL[p] || p; }
+
+function money(n){ n=Number(n)||0; return '₹'+n.toLocaleString('en-IN',{maximumFractionDigits:0}); }
+
+function setTheme(theme){
+  document.body.classList.toggle('light-theme', theme==='light');
+  localStorage.setItem('ledgerTheme', theme);
+  document.getElementById('themeDarkBtn').classList.toggle('active', theme==='dark');
+  document.getElementById('themeLightBtn').classList.toggle('active', theme==='light');
+}
+(function initTheme(){
+  const saved = localStorage.getItem('ledgerTheme') || 'dark';
+  document.body.classList.toggle('light-theme', saved==='light');
+  document.getElementById('themeDarkBtn')?.classList.toggle('active', saved==='dark');
+  document.getElementById('themeLightBtn')?.classList.toggle('active', saved==='light');
+})();
+
+/* ---------- LOCK / PROFILE ---------- */
+let pendingProfile = null;
+let pinBuffer = '';
+let pinMode = 'enter';
+let currentUser = null;
+
+function pickProfile(name){
+  pendingProfile = name;
+  const stored = localStorage.getItem('ledgerPin_'+name);
+  pinMode = stored ? 'enter' : 'set';
+  pinBuffer = '';
+  document.getElementById('lockStep1').classList.add('hidden');
+  document.getElementById('lockStep2').classList.remove('hidden');
+  document.getElementById('pinHeading').textContent = pinMode==='set' ? 'Set a 4-digit PIN' : 'Enter your PIN';
+  document.getElementById('pinSub').textContent = pinMode==='set' ? 'పిన్ సెట్ చేయండి' : '4-అంకెల పిన్ నమోదు చేయండి';
+  document.getElementById('lockMsg').textContent = '';
+  updatePinDots();
+}
+function updatePinDots(){
+  document.querySelectorAll('#pinDots .dot').forEach((d,i)=> d.classList.toggle('filled', i < pinBuffer.length));
+}
+function pinPress(digit){
+  if(pinBuffer.length>=4) return;
+  pinBuffer += digit;
+  updatePinDots();
+  if(pinBuffer.length===4){
+    setTimeout(()=>{
+      if(pinMode==='set'){
+        localStorage.setItem('ledgerPin_'+pendingProfile, pinBuffer);
+        unlockAs(pendingProfile);
+      } else {
+        const stored = localStorage.getItem('ledgerPin_'+pendingProfile);
+        if(stored===pinBuffer){ unlockAs(pendingProfile); }
+        else{ document.getElementById('lockMsg').textContent = 'Wrong PIN, try again · తప్పు పిన్'; pinBuffer=''; updatePinDots(); }
+      }
+    }, 150);
+  }
+}
+function pinClear(){ pinBuffer=''; updatePinDots(); document.getElementById('lockMsg').textContent=''; }
+function pinBack(){
+  document.getElementById('lockStep2').classList.add('hidden');
+  document.getElementById('lockStep1').classList.remove('hidden');
+  pinBuffer=''; updatePinDots();
+}
+function unlockAs(name){
+  currentUser = name;
+  document.getElementById('lockScreen').classList.add('hidden');
+  document.getElementById('userChipName').textContent = personLabel(name);
+  document.getElementById('userAvLetter').textContent = name[0];
+  bootApp();
+}
+function lockApp(){
+  currentUser = null;
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('bottomNav').classList.add('hidden');
+  document.getElementById('lockStep1').classList.remove('hidden');
+  document.getElementById('lockStep2').classList.add('hidden');
+  document.getElementById('lockScreen').classList.remove('hidden');
+}
+
+/* ---------- APP BOOT ---------- */
+let entryType = 'income';
+let dashPersonFilter = 'all';
+let DATA = { income:[], expenses:[], savings:[], budgets:[], recurring:[] };
+let editingContext = null; // {sheet, rowIndex, type}
+
+function bootApp(){
+  if(!API_URL){ document.getElementById('setupScreen').classList.remove('hidden'); return; }
+  document.getElementById('app').classList.remove('hidden');
+  document.getElementById('bottomNav').classList.remove('hidden');
+  document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('reportMonth').value = new Date().toISOString().slice(0,7);
+  document.getElementById('reportYear').value = new Date().getFullYear();
+  buildDashPersonFilter();
+  buildPersonSelects();
+  buildRecurringSelects();
+  setEntryType('income');
+  setupInstallUI();
+  renderFavorites();
+
+  // Show last-known data instantly (if any) while fresh data loads in the background
+  const cached = localStorage.getItem('ledgerDataCache');
+  if(cached){
+    try{ DATA = JSON.parse(cached); render(); }catch(e){}
+  }
+  loadData();
+}
+
+function buildCategorySelect(){
+  document.getElementById('f-cat').innerHTML = CATEGORIES[entryType].map(c=>`<option value="${c}">${catBI(c)}</option>`).join('');
+}
+function buildPaymentSelect(){
+  document.getElementById('f-payment').innerHTML = PAYMENT_MODES.map(p=>`<option value="${p}">${PAYMENT_MODE_ICON[p]} ${paymentBI(p)}</option>`).join('');
+}
+function buildPersonSelects(){
+  document.getElementById('f-person').innerHTML = PROFILES.map(p=>`<option value="${p}" ${p===currentUser?'selected':''}>${personLabel(p)}</option>`).join('');
+  document.getElementById('reportPerson').innerHTML = `<option value="all">All · అందరూ</option>` + PROFILES.map(p=>`<option value="${p}">${personLabel(p)}</option>`).join('');
+}
+function buildDashPersonFilter(){
+  const el = document.getElementById('dashPersonFilter');
+  el.innerHTML = [['all','All · అందరూ'], ...PROFILES.map(p=>[p,personLabel(p)])]
+    .map(([val,label])=>`<button class="chip ${dashPersonFilter===val?'active':''}" onclick="setDashFilter('${val}')">${label}</button>`).join('');
+}
+function setDashFilter(val){ dashPersonFilter = val; buildDashPersonFilter(); render(); }
+
+function saveSetup(){
+  const url = document.getElementById('setupUrl').value.trim();
+  const msg = document.getElementById('setupMsg');
+  if(!url.startsWith('https://script.google.com')){ msg.className='msg err'; msg.textContent="That doesn't look like a valid URL."; return; }
+  localStorage.setItem('ledgerApiUrl', url); API_URL = url;
+  document.getElementById('setupScreen').classList.add('hidden');
+  bootApp();
+}
+function updateApiUrl(){
+  const url = document.getElementById('settingsUrl').value.trim();
+  if(!url.startsWith('https://script.google.com')){
+    document.getElementById('settingsMsg').className='msg err'; document.getElementById('settingsMsg').textContent="That doesn't look like a valid URL."; return;
+  }
+  localStorage.setItem('ledgerApiUrl', url); API_URL = url;
+  document.getElementById('settingsMsg').className='msg ok'; document.getElementById('settingsMsg').textContent='Saved. Reloading your data…';
+  loadData();
+}
+
+function setEntryType(tp){
+  if(editingContext && tp !== editingContext.type){
+    editingContext = null;
+    document.getElementById('editBanner').classList.add('hidden');
+    document.getElementById('submitBtn').innerHTML = 'Save entry<span class="bi">నమోదు సేవ్ చేయి</span>';
+  }
+  entryType = tp;
+  ['income','expense','savings'].forEach(x=> document.getElementById('tb-'+x).classList.toggle('active', x===tp));
+  document.getElementById('f-cat-label').innerHTML = tp==='savings' ? 'Type <span class="bi">రకం</span>' : 'Source <span class="bi">మూలం</span>';
+  buildCategorySelect();
+  document.getElementById('subcatWrap').classList.toggle('hidden', tp !== 'expense');
+  document.getElementById('paymentWrap').classList.toggle('hidden', tp === 'income');
+  document.getElementById('splitWrap').classList.toggle('hidden', tp !== 'expense' || !!editingContext);
+  if(tp !== 'income') buildPaymentSelect();
+}
+
+function editEntry(sheetName, rowIndex){
+  const key = REVERSE_SHEET[sheetName];
+  const arr = key==='income' ? DATA.income : key==='expense' ? DATA.expenses : DATA.savings;
+  const row = arr.find(r=>r._rowIndex===rowIndex);
+  if(!row) return;
+
+  setEntryType(key);
+  editingContext = { sheet: sheetName, rowIndex: rowIndex, type: key };
+
+  document.getElementById('f-person').value = row.Person || currentUser;
+  document.getElementById('f-date').value = row.Date ? new Date(row.Date).toISOString().slice(0,10) : new Date().toISOString().slice(0,10);
+  document.getElementById('f-cat').value = key==='income' ? row.Source : key==='expense' ? row.Category : row.Type;
+  if(key==='expense') document.getElementById('f-subcat').value = row.SubCategory || '';
+  if(key!=='income') document.getElementById('f-payment').value = row.PaymentMode || PAYMENT_MODES[0];
+  document.getElementById('f-amount').value = row.Amount || '';
+  document.getElementById('f-notes').value = row.Notes || '';
+
+  document.getElementById('editBanner').classList.remove('hidden');
+  document.getElementById('splitWrap').classList.add('hidden');
+  document.getElementById('submitBtn').innerHTML = 'Update entry<span class="bi">నమోదు నవీకరించు</span>';
+  showView('add');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function cancelEdit(){
+  editingContext = null;
+  document.getElementById('editBanner').classList.add('hidden');
+  document.getElementById('submitBtn').innerHTML = 'Save entry<span class="bi">నమోదు సేవ్ చేయి</span>';
+  document.getElementById('entryForm').reset();
+  document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+  buildPersonSelects();
+}
+
+function showView(v){
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelectorAll('nav.bottom button').forEach(b=>b.classList.toggle('active', b.dataset.v===v));
+  if(v==='reports') renderReports();
+  if(v==='budget') renderBudgetForm();
+  if(v==='settings'){ document.getElementById('settingsUrl').value = API_URL; renderRecurringList(); }
+}
+
+async function loadData(){
+  try{
+    const res = await fetch(API_URL);
+    DATA = await res.json();
+    if(!DATA.recurring) DATA.recurring = [];
+    localStorage.setItem('ledgerDataCache', JSON.stringify(DATA));
+    render();
+    if(document.getElementById('view-settings').classList.contains('active')) renderRecurringList();
+  }catch(err){
+    if(!DATA.income.length && !DATA.expenses.length && !DATA.savings.length){
+      document.getElementById('recentList').innerHTML = `<div class="empty">Couldn't load your ledger — check your internet connection.<br>ఇంటర్నెట్ కనెక్షన్ చూడండి.</div>`;
+    }
+  }
+}
+
+function inCurrentMonth(d){ const now=new Date(); const dt=new Date(d); return dt.getMonth()===now.getMonth() && dt.getFullYear()===now.getFullYear(); }
+function filterPerson(rows, person){ return person==='all' ? rows : rows.filter(r=>r.Person===person); }
+
+function donutHtml(catEntries){
+  if(!catEntries.length) return `<div class="empty">No expenses logged yet this month.<br>ఈ నెల ఇంకా ఖర్చులు నమోదు కాలేదు.</div>`;
+  const total = catEntries.reduce((s,[,v])=>s+v,0) || 1;
+  let acc = 0;
+  const stops = catEntries.map(([cat,val])=>{
+    const start = acc/total*100; acc += val; const end = acc/total*100;
+    return `${CATEGORY_COLOR[cat]||'#8FA398'} ${start}% ${end}%`;
+  }).join(', ');
+  const legend = catEntries.map(([cat,val])=>{
+    const pct = Math.round(val/total*100);
+    return `<div class="legend-row"><span class="dot" style="background:${CATEGORY_COLOR[cat]||'#8FA398'}"></span><span class="lg-name">${catBI(cat)}</span><span class="lg-amt">${money(val)} · ${pct}%</span></div>`;
+  }).join('');
+  return `<div class="donut-wrap"><div class="donut" style="background:conic-gradient(${stops})"></div><div class="legend">${legend}</div></div>`;
+}
+
+function ringSvg(pct){
+  if(pct===null) return '';
+  const clamped = Math.min(pct,100);
+  const r=28, c=2*Math.PI*r;
+  const offset = c - (clamped/100)*c;
+  const color = pct>100 ? '#FF5C4D' : (pct>80 ? '#C9720E' : '#1A1206');
+  return `<svg width="70" height="70" viewBox="0 0 70 70">
+    <circle cx="35" cy="35" r="${r}" stroke="rgba(26,18,6,0.25)" stroke-width="6" fill="none"/>
+    <circle cx="35" cy="35" r="${r}" stroke="${color}" stroke-width="6" fill="none" stroke-linecap="round"
+      stroke-dasharray="${c}" stroke-dashoffset="${offset}" transform="rotate(-90 35 35)"/>
+    <text x="35" y="40" text-anchor="middle" font-size="14" font-weight="700" fill="#1A1206" font-family="IBM Plex Mono, monospace">${Math.round(pct)}%</text>
+  </svg><div class="ring-caption">Budget used<br>వాడిన బడ్జెట్</div>`;
+}
+
+function render(){
+  const now = new Date();
+  document.getElementById('monthLabel').textContent = now.toLocaleString('en-IN',{month:'long', year:'numeric'});
+
+  const inc = filterPerson(DATA.income.filter(r=>inCurrentMonth(r.Date)), dashPersonFilter);
+  const exp = filterPerson(DATA.expenses.filter(r=>inCurrentMonth(r.Date)), dashPersonFilter);
+  const sav = filterPerson(DATA.savings.filter(r=>inCurrentMonth(r.Date)), dashPersonFilter);
+
+  const incomeTotal = inc.reduce((s,r)=>s+Number(r.Amount||0),0);
+  const expenseTotal = exp.reduce((s,r)=>s+Number(r.Amount||0),0);
+  const savingsTotal = sav.reduce((s,r)=>s+Number(r.Amount||0),0);
+
+  document.getElementById('sumIncome').textContent = money(incomeTotal);
+  document.getElementById('sumExpense').textContent = money(expenseTotal);
+  document.getElementById('sumSavings').textContent = money(savingsTotal);
+  document.getElementById('netValue').textContent = money(incomeTotal - expenseTotal - savingsTotal);
+
+  const budgetMap = {};
+  (DATA.budgets||[]).forEach(b=>{ budgetMap[b.Category] = Number(b.MonthlyLimit||0); });
+  const totalBudget = Object.values(budgetMap).reduce((s,v)=>s+v,0);
+  document.getElementById('ringWrap').innerHTML = totalBudget>0 ? ringSvg(expenseTotal/totalBudget*100) : '';
+
+  const byCat = {};
+  exp.forEach(r=>{ byCat[r.Category] = (byCat[r.Category]||0) + Number(r.Amount||0); });
+  const catEntries = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('catDonut').innerHTML = donutHtml(catEntries);
+
+  const byDateDesc = (a,b)=> new Date(b.Date) - new Date(a.Date);
+  // Guarantee representation from each type, so income/savings can't be crowded
+  // out of the list just because there are more expense entries logged today.
+  const recentInc = inc.map(r=>({...r, _type:'income', _cat:r.Source})).sort(byDateDesc).slice(0,4);
+  const recentExp = exp.map(r=>({...r, _type:'expense', _cat:r.Category})).sort(byDateDesc).slice(0,4);
+  const recentSav = sav.map(r=>({...r, _type:'savings', _cat:r.Type})).sort(byDateDesc).slice(0,4);
+  const all = [...recentInc, ...recentExp, ...recentSav].sort(byDateDesc);
+
+  const recentEl = document.getElementById('recentList');
+  recentEl.innerHTML = all.length ? all.slice(0,10).map(r=>rowHtml(r,true)).join('') : `<div class="empty">Nothing here yet — add your first entry below.<br>ఇంకా ఏమీ లేదు.</div>`;
+
+  renderDueBills();
+}
+
+function rowHtml(r, showActions){
+  const sign = r._type==='income' ? '+' : '−';
+  const dateStr = r.Date ? new Date(r.Date).toLocaleDateString('en-IN',{day:'2-digit',month:'short'}) : '';
+  const paymentBadge = r.PaymentMode ? `<span class="person-tag">${PAYMENT_MODE_ICON[r.PaymentMode]||''} ${r.PaymentMode}</span>` : '';
+  return `<div class="ledger-row">
+    <div class="left">
+      <div class="cat">${catBI(r._cat)||''}${r.Person?`<span class="person-tag">${personLabel(r.Person)}</span>`:''}${paymentBadge}</div>
+      <div class="sub">${dateStr}${r.Notes ? ' · '+r.Notes : ''}${r.SubCategory ? ' · '+catBI(r.SubCategory) : ''}</div>
+    </div>
+    <div class="right">
+      <div class="amt ${r._type==='income'?'inc':r._type==='savings'?'sav':'exp'}">${sign}${money(r.Amount)}</div>
+      ${showActions ? `<button class="del-btn" onclick="editEntry('${SHEET_NAME[r._type]}', ${r._rowIndex})">✎</button><button class="del-btn" onclick="deleteEntry('${SHEET_NAME[r._type]}', ${r._rowIndex})">✕</button>` : ''}
+    </div>
+  </div>`;
+}
+
+async function submitEntry(e){
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  const msg = document.getElementById('entryMsg');
+  btn.disabled = true;
+  msg.className='msg ok'; msg.style.display='block'; msg.textContent='Saving… · సేవ్ అవుతోంది…';
+
+  const person = document.getElementById('f-person').value;
+  const date = document.getElementById('f-date').value;
+  const cat = document.getElementById('f-cat').value;
+  const amount = document.getElementById('f-amount').value;
+  const notes = document.getElementById('f-notes').value;
+  const subcat = document.getElementById('f-subcat').value;
+  const payment = entryType !== 'income' ? document.getElementById('f-payment').value : '';
+  const isSplit = entryType==='expense' && !editingContext && document.getElementById('f-split').checked;
+
+  try{
+    // mode:'no-cors' avoids a false "failed to fetch" error that Google Apps
+    // Script's redirect can trigger even when the save actually succeeded.
+    if(editingContext){
+      let row;
+      if(entryType==='income') row = [date, person, cat, cat, amount, notes];
+      else if(entryType==='expense') row = [date, person, cat, subcat, amount, payment, notes];
+      else row = [date, person, cat, amount, payment, notes];
+      await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify({ action:'update', sheet: editingContext.sheet, rowIndex: editingContext.rowIndex, row }) });
+    } else if(isSplit){
+      const half = (Number(amount)/2).toFixed(2);
+      const splitNote = notes ? `${notes} (split)` : '(split)';
+      for(const p of PROFILES){
+        const row = [date, p, cat, subcat, half, payment, splitNote];
+        await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
+          body: JSON.stringify({ action:'add', sheet: SHEET_NAME.expense, row }) });
+      }
+    } else {
+      let row;
+      if(entryType==='income') row = [date, person, cat, cat, amount, notes];
+      else if(entryType==='expense') row = [date, person, cat, subcat, amount, payment, notes];
+      else row = [date, person, cat, amount, payment, notes];
+      await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify({ action:'add', sheet: SHEET_NAME[entryType], row }) });
+    }
+    msg.className='msg ok'; msg.textContent = editingContext ? 'Entry updated. · నవీకరించబడింది.' : 'Saved to your ledger. · సేవ్ అయ్యింది.';
+    const wasEditing = !!editingContext;
+    editingContext = null;
+    document.getElementById('editBanner').classList.add('hidden');
+    document.getElementById('submitBtn').innerHTML = 'Save entry<span class="bi">నమోదు సేవ్ చేయి</span>';
+    document.getElementById('entryForm').reset();
+    document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+    buildPersonSelects();
+    setEntryType(entryType);
+    await loadData();
+    if(wasEditing) showView('dashboard');
+    setTimeout(()=>{ msg.className='msg'; msg.textContent=''; }, 2500);
+  }catch(err){
+    msg.className='msg err'; msg.textContent='Could not save — check your internet and try again. · సేవ్ కాలేదు.';
+  }
+  btn.disabled = false;
+}
+
+async function deleteEntry(sheet, rowIndex){
+  if(!confirm('Remove this entry? · ఈ నమోదును తీసివేయాలా?')) return;
+  try{
+    await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action:'delete', sheet, rowIndex }) });
+    await loadData();
+    if(document.getElementById('view-reports').classList.contains('active')) renderReports();
+  }catch(err){ alert('Could not delete. · తీసివేయలేకపోయాం.'); }
+}
+
+/* ---------- BUDGET ---------- */
+function renderBudgetForm(){
+  const el = document.getElementById('budgetForm');
+  const budgetMap = {};
+  (DATA.budgets||[]).forEach(b=>{ budgetMap[b.Category] = Number(b.MonthlyLimit||0); });
+
+  const spentMap = {};
+  (DATA.expenses||[]).filter(r=>inCurrentMonth(r.Date)).forEach(r=>{
+    spentMap[r.Category] = (spentMap[r.Category]||0) + Number(r.Amount||0);
+  });
+
+  el.innerHTML = CATEGORIES.expense.map(cat=>{
+    const spent = spentMap[cat] || 0;
+    return `
+    <div class="budget-row" data-cat="${cat}">
+      <div class="row-top">
+        <span class="dot" style="background:${CATEGORY_COLOR[cat]||'#8FA398'}"></span>
+        <div><span class="name">${cat}</span><span class="bi">${CATEGORY_TE[cat]||''}</span></div>
+      </div>
+      <div class="amount-line">
+        <span class="rupee-prefix">₹</span>
+        <input type="number" min="0" step="1" value="${budgetMap[cat]||0}" class="budget-input">
+      </div>
+      ${spent>0 ? `<div class="spent-note">Spent this month: <b>${money(spent)}</b> · ఈ నెల ఖర్చు</div>` : ''}
+    </div>`;
+  }).join('');
+}
+async function saveBudgets(){
+  const rows = document.querySelectorAll('#budgetForm .budget-row');
+  const budgets = Array.from(rows).map(r=>({ category: r.dataset.cat, limit: Number(r.querySelector('.budget-input').value)||0 }));
+  const msg = document.getElementById('budgetMsg');
+  msg.className='msg ok'; msg.style.display='block'; msg.textContent='Saving… · సేవ్ అవుతోంది…';
+  try{
+    await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action:'saveBudgets', budgets }) });
+    msg.className='msg ok'; msg.textContent='Budget saved. · బడ్జెట్ సేవ్ అయ్యింది.';
+    await loadData();
+    setTimeout(()=>{ msg.className='msg'; msg.textContent=''; }, 2500);
+  }catch(err){ msg.className='msg err'; msg.textContent='Could not save. · సేవ్ కాలేదు.'; }
+}
+
+/* ---------- REPORTS ---------- */
+let lastReportRows = [];
+let reportPeriod = 'month';
+function setReportPeriod(p){
+  reportPeriod = p;
+  document.getElementById('periodMonthBtn').classList.toggle('active', p==='month');
+  document.getElementById('periodYearBtn').classList.toggle('active', p==='year');
+  document.getElementById('reportMonthWrap').classList.toggle('hidden', p!=='month');
+  document.getElementById('reportYearWrap').classList.toggle('hidden', p!=='year');
+  renderReports();
+}
+function matchesSearch(r, term){
+  if(!term) return true;
+  const hay = [r.Person, r.Category, r.Source, r.Type, r.SubCategory, r.PaymentMode, r.Notes].filter(Boolean).join(' ').toLowerCase();
+  return hay.includes(term);
+}
+function monthKey(d){ const dt=new Date(d); return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0'); }
+
+function renderReports(){
+  const person = document.getElementById('reportPerson').value || 'all';
+  const search = (document.getElementById('reportSearch').value || '').trim().toLowerCase();
+
+  let inc, exp, sav;
+
+  if(search){
+    inc = filterPerson(DATA.income, person).filter(r=>matchesSearch(r, search));
+    exp = filterPerson(DATA.expenses, person).filter(r=>matchesSearch(r, search));
+    sav = filterPerson(DATA.savings, person).filter(r=>matchesSearch(r, search));
+  } else if(reportPeriod==='year'){
+    const yearVal = Number(document.getElementById('reportYear').value) || new Date().getFullYear();
+    const inYear = (d)=>{ if(!d) return false; return new Date(d).getFullYear()===yearVal; };
+    inc = filterPerson(DATA.income.filter(r=>inYear(r.Date)), person);
+    exp = filterPerson(DATA.expenses.filter(r=>inYear(r.Date)), person);
+    sav = filterPerson(DATA.savings.filter(r=>inYear(r.Date)), person);
+  } else {
+    const monthVal = document.getElementById('reportMonth').value || new Date().toISOString().slice(0,7);
+    const inSelectedMonth = (d)=>{ if(!d) return false; return String(d).slice(0,7)===monthVal || new Date(d).toISOString().slice(0,7)===monthVal; };
+    inc = filterPerson(DATA.income.filter(r=>inSelectedMonth(r.Date)), person);
+    exp = filterPerson(DATA.expenses.filter(r=>inSelectedMonth(r.Date)), person);
+    sav = filterPerson(DATA.savings.filter(r=>inSelectedMonth(r.Date)), person);
+  }
+
+  document.getElementById('repIncome').textContent = money(inc.reduce((s,r)=>s+Number(r.Amount||0),0));
+  document.getElementById('repExpense').textContent = money(exp.reduce((s,r)=>s+Number(r.Amount||0),0));
+  document.getElementById('repSavings').textContent = money(sav.reduce((s,r)=>s+Number(r.Amount||0),0));
+
+  renderTrendChart(person);
+
+  const byCat = {};
+  exp.forEach(r=>{ byCat[r.Category] = (byCat[r.Category]||0) + Number(r.Amount||0); });
+  const catEntries = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('repDonut').innerHTML = donutHtml(catEntries);
+
+  const byPayment = {};
+  [...exp, ...sav].forEach(r=>{ if(r.PaymentMode) byPayment[r.PaymentMode] = (byPayment[r.PaymentMode]||0) + Number(r.Amount||0); });
+  const paymentEntries = Object.entries(byPayment).sort((a,b)=>b[1]-a[1]);
+  const payTotal = paymentEntries.reduce((s,[,v])=>s+v,0) || 1;
+  document.getElementById('repPayment').innerHTML = paymentEntries.length ? paymentEntries.map(([mode,val])=>`
+    <div class="bar-row">
+      <div class="top-line"><span class="name">${PAYMENT_MODE_ICON[mode]||''} ${paymentBI(mode)}</span><span class="amt">${money(val)}</span></div>
+      <div class="track"><div class="fill" style="width:${Math.max(6,(val/payTotal*100))}%"></div></div>
+    </div>`).join('') : `<div class="empty">No entries yet. · ఇంకా నమోదులు లేవు.</div>`;
+
+  const all = [
+    ...inc.map(r=>({...r, _type:'income', _cat:r.Source})),
+    ...exp.map(r=>({...r, _type:'expense', _cat:r.Category})),
+    ...sav.map(r=>({...r, _type:'savings', _cat:r.Type}))
+  ].sort((a,b)=> new Date(b.Date) - new Date(a.Date));
+  lastReportRows = all;
+  document.getElementById('repList').innerHTML = all.length ? all.map(r=>rowHtml(r,true)).join('') : `<div class="empty">No entries yet. · ఇంకా నమోదులు లేవు.</div>`;
+}
+
+function renderTrendChart(person){
+  const now = new Date();
+  const months = [];
+  for(let i=5;i>=0;i--){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    months.push({ key: d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'), label: d.toLocaleString('en-IN',{month:'short'}) });
+  }
+  const incByMonth = {}, expByMonth = {};
+  filterPerson(DATA.income, person).forEach(r=>{ const k=monthKey(r.Date); incByMonth[k]=(incByMonth[k]||0)+Number(r.Amount||0); });
+  filterPerson(DATA.expenses, person).forEach(r=>{ const k=monthKey(r.Date); expByMonth[k]=(expByMonth[k]||0)+Number(r.Amount||0); });
+  const maxVal = Math.max(1, ...months.map(m=>Math.max(incByMonth[m.key]||0, expByMonth[m.key]||0)));
+  const cols = months.map(m=>{
+    const inc = incByMonth[m.key]||0, exp = expByMonth[m.key]||0;
+    return `<div class="trend-col">
+      <div class="trend-bars">
+        <div class="trend-bar inc" style="height:${Math.max(3, inc/maxVal*100)}%"></div>
+        <div class="trend-bar exp" style="height:${Math.max(3, exp/maxVal*100)}%"></div>
+      </div>
+      <div class="trend-label">${m.label}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('trendChart').innerHTML = `<div class="trend-wrap">${cols}</div>
+    <div class="trend-legend"><span><i style="background:var(--accent)"></i>Income · ఆదాయం</span><span><i style="background:var(--danger)"></i>Expenses · ఖర్చులు</span></div>`;
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('reportMonth')?.addEventListener('change', renderReports);
+  document.getElementById('reportYear')?.addEventListener('change', renderReports);
+  document.getElementById('reportPerson')?.addEventListener('change', renderReports);
+  document.getElementById('reportSearch')?.addEventListener('input', renderReports);
+});
+
+
+function downloadCSV(){
+  if(!lastReportRows.length){ alert('No entries to export. · ఎగుమతి చేయడానికి నమోదులు లేవు.'); return; }
+  const header = ['Date','Person','Type','Category','SubCategory','PaymentMode','Amount','Notes'];
+  const lines = [header.join(',')];
+  lastReportRows.forEach(r=>{
+    const line = [r.Date, r.Person, r._type, r._cat, r.SubCategory||'', r.PaymentMode||'', r.Amount, (r.Notes||'').replace(/,/g,';')];
+    lines.push(line.join(','));
+  });
+  const blob = new Blob([lines.join('\n')], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'home-ledger-report.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ---------- PWA install ---------- */
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  setupInstallUI();
+});
+window.addEventListener('appinstalled', ()=>{
+  deferredInstallPrompt = null;
+  setupInstallUI();
+});
+function isStandalone(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function isIOS(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+function setupInstallUI(){
+  const slot = document.getElementById('installSlot');
+  const settingsCard = document.getElementById('installSettingsCard');
+  const iosNote = document.getElementById('iosInstallNote');
+  const installBtn = document.getElementById('installBtnSettings');
+  if(!slot) return;
+
+  if(isStandalone()){ slot.innerHTML=''; if(settingsCard) settingsCard.style.display='none'; return; }
+
+  if(deferredInstallPrompt){
+    slot.innerHTML = `<div class="install-card">
+      <div class="t1">Install this app on your phone</div>
+      <div class="t2">మీ ఫోన్‌లో యాప్‌ను ఇన్‌స్టాల్ చేయండి — ఒక్క నొక్కుతో తెరవండి</div>
+      <button onclick="triggerInstall()">Install now</button>
+    </div>`;
+    if(settingsCard){ settingsCard.style.display='block'; iosNote.classList.add('hidden'); installBtn.classList.remove('hidden'); }
+  } else if(isIOS()){
+    slot.innerHTML = `<div class="install-card">
+      <div class="t1">Add to Home Screen</div>
+      <div class="t2">Tap Share → "Add to Home Screen" in Safari · Share ఐకాన్ నొక్కి చేర్చండి</div>
+    </div>`;
+    if(settingsCard){ settingsCard.style.display='block'; installBtn.classList.add('hidden'); iosNote.classList.remove('hidden'); }
+  } else {
+    slot.innerHTML = '';
+    if(settingsCard) settingsCard.style.display='none';
+  }
+}
+async function triggerInstall(){
+  if(!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  setupInstallUI();
+}
+
+/* ---------- RECURRING BILLS ---------- */
+function buildRecurringSelects(){
+  document.getElementById('rb-category').innerHTML = CATEGORIES.expense.map(c=>`<option value="${c}">${catBI(c)}</option>`).join('');
+  document.getElementById('rb-person').innerHTML = PROFILES.map(p=>`<option value="${p}">${personLabel(p)}</option>`).join('');
+  document.getElementById('rb-payment').innerHTML = PAYMENT_MODES.map(p=>`<option value="${p}">${PAYMENT_MODE_ICON[p]} ${paymentBI(p)}</option>`).join('');
+}
+function renderRecurringList(){
+  const el = document.getElementById('recurringList');
+  if(!el) return;
+  const list = DATA.recurring||[];
+  el.innerHTML = list.length ? list.map(r=>`
+    <div class="bill-row">
+      <div><div class="nm">${r.Name}</div><div class="meta">${catBI(r.Category)} · Due day ${r.DueDay} · ${personLabel(r.Person)}</div></div>
+      <div style="display:flex; align-items:center; gap:10px;"><span class="amt">${money(r.Amount)}</span><button class="del-btn" onclick="deleteRecurring(${r._rowIndex})">✕</button></div>
+    </div>`).join('') : `<div class="empty">No recurring bills yet. · పునరావృత బిల్లులు లేవు.</div>`;
+}
+async function addRecurring(){
+  const name = document.getElementById('rb-name').value.trim();
+  const category = document.getElementById('rb-category').value;
+  const person = document.getElementById('rb-person').value;
+  const amount = document.getElementById('rb-amount').value;
+  const dueDay = document.getElementById('rb-dueday').value;
+  const payment = document.getElementById('rb-payment').value;
+  const msg = document.getElementById('recurringMsg');
+  if(!name || !amount || !dueDay){
+    msg.className='msg err'; msg.style.display='block'; msg.textContent='Please fill name, amount and due day. · అన్నీ నింపండి.';
+    return;
+  }
+  const row = [name, category, amount, dueDay, person, payment];
+  msg.className='msg ok'; msg.style.display='block'; msg.textContent='Saving… · సేవ్ అవుతోంది…';
+  try{
+    await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action:'add', sheet:'Recurring', row }) });
+    document.getElementById('rb-name').value=''; document.getElementById('rb-amount').value=''; document.getElementById('rb-dueday').value='';
+    msg.className='msg ok'; msg.textContent='Bill added. · బిల్లు చేర్చబడింది.';
+    await loadData();
+    renderRecurringList();
+    setTimeout(()=>{ msg.className='msg'; msg.textContent=''; }, 2000);
+  }catch(err){ msg.className='msg err'; msg.textContent='Could not save. · సేవ్ కాలేదు.'; }
+}
+async function deleteRecurring(rowIndex){
+  if(!confirm('Remove this recurring bill? · ఈ బిల్లును తీసివేయాలా?')) return;
+  try{
+    await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action:'delete', sheet:'Recurring', rowIndex }) });
+    await loadData();
+    renderRecurringList();
+  }catch(err){ alert('Could not delete. · తీసివేయలేకపోయాం.'); }
+}
+function renderDueBills(){
+  const banner = document.getElementById('dueBanner');
+  const list = DATA.recurring||[];
+  if(!list.length){ banner.classList.add('hidden'); return; }
+  const today = new Date().getDate();
+  const dueSoon = list.filter(r=>{
+    const day = Number(r.DueDay);
+    if(!day) return false;
+    const diff = day - today;
+    return diff>=0 && diff<=5;
+  }).sort((a,b)=>Number(a.DueDay)-Number(b.DueDay));
+  if(!dueSoon.length){ banner.classList.add('hidden'); return; }
+  banner.classList.remove('hidden');
+  banner.innerHTML = `<div class="t1">📅 Upcoming bills · రాబోయే బిల్లులు</div>` +
+    dueSoon.map(r=>`<div class="due-item"><span>${r.Name} — ${money(r.Amount)} (Day ${r.DueDay})</span><button onclick="payRecurring(${r._rowIndex})">Mark paid</button></div>`).join('');
+}
+function payRecurring(rowIndex){
+  const bill = (DATA.recurring||[]).find(r=>r._rowIndex===rowIndex);
+  if(!bill) return;
+  setEntryType('expense');
+  document.getElementById('f-person').value = bill.Person;
+  document.getElementById('f-cat').value = bill.Category;
+  document.getElementById('f-subcat').value = bill.Name;
+  document.getElementById('f-payment').value = bill.PaymentMode || PAYMENT_MODES[0];
+  document.getElementById('f-amount').value = bill.Amount;
+  document.getElementById('f-notes').value = `${bill.Name} (recurring)`;
+  showView('add');
+}
+
+/* ---------- QUICK-ADD FAVORITES ---------- */
+function getFavorites(){ try{ return JSON.parse(localStorage.getItem('ledgerFavorites')||'[]'); }catch(e){ return []; } }
+function saveFavoritesList(favs){ localStorage.setItem('ledgerFavorites', JSON.stringify(favs)); }
+function renderFavorites(){
+  const wrap = document.getElementById('favChipRow');
+  if(!wrap) return;
+  const favs = getFavorites();
+  if(!favs.length){ wrap.innerHTML=''; wrap.classList.add('hidden'); return; }
+  wrap.classList.remove('hidden');
+  wrap.innerHTML = favs.map((f,i)=>`<div class="fav-chip" onclick="applyFavorite(${i})">⭐ ${f.label}<span class="rm" onclick="event.stopPropagation(); removeFavorite(${i})">✕</span></div>`).join('');
+}
+function applyFavorite(i){
+  const f = getFavorites()[i];
+  if(!f) return;
+  setEntryType(f.type);
+  document.getElementById('f-person').value = f.person;
+  document.getElementById('f-cat').value = f.category;
+  if(f.type==='expense') document.getElementById('f-subcat').value = f.subcategory || '';
+  if(f.type!=='income') document.getElementById('f-payment').value = f.paymentMode || PAYMENT_MODES[0];
+  document.getElementById('f-amount').value = f.amount || '';
+  document.getElementById('f-notes').value = f.notes || '';
+}
+function removeFavorite(i){
+  const favs = getFavorites();
+  favs.splice(i,1);
+  saveFavoritesList(favs);
+  renderFavorites();
+}
+function saveCurrentAsFavorite(){
+  const cat = document.getElementById('f-cat').value;
+  const amount = document.getElementById('f-amount').value;
+  const favorite = {
+    type: entryType,
+    person: document.getElementById('f-person').value,
+    category: cat,
+    subcategory: entryType==='expense' ? document.getElementById('f-subcat').value : '',
+    paymentMode: entryType!=='income' ? document.getElementById('f-payment').value : '',
+    amount: amount,
+    notes: document.getElementById('f-notes').value,
+    label: `${cat}${amount ? ' · ₹'+amount : ''}`
+  };
+  const favs = getFavorites();
+  favs.push(favorite);
+  saveFavoritesList(favs);
+  renderFavorites();
+}
+
+/* ---------- BACKUP & RESTORE ---------- */
+function downloadBackup(){
+  const backup = {
+    exportedAt: new Date().toISOString(),
+    income: DATA.income, expenses: DATA.expenses, savings: DATA.savings,
+    budgets: DATA.budgets, recurring: DATA.recurring
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `knr-ledger-backup-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+async function restoreBackup(evt){
+  const file = evt.target.files[0];
+  if(!file) return;
+  const msg = document.getElementById('backupMsg');
+  try{
+    const text = await file.text();
+    const backup = JSON.parse(text);
+    const proceed = confirm('This will ADD the backed-up entries back into your sheet (existing entries are kept, not removed). Continue? · ఇది బ్యాకప్ నమోదులను తిరిగి చేరుస్తుంది. కొనసాగించాలా?');
+    if(!proceed){ evt.target.value=''; return; }
+
+    function toRows(list, headers){
+      return (list||[]).map(obj => headers.map(h => obj.hasOwnProperty(h) ? obj[h] : ''));
+    }
+    const sheets = {
+      Income: toRows(backup.income, ['Date','Person','Source','Category','Amount','Notes']),
+      Expenses: toRows(backup.expenses, ['Date','Person','Category','SubCategory','Amount','PaymentMode','Notes']),
+      Savings: toRows(backup.savings, ['Date','Person','Type','Amount','PaymentMode','Notes'])
+    };
+    msg.className='msg ok'; msg.style.display='block'; msg.textContent='Restoring… · పునరుద్ధరిస్తోంది…';
+    await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action:'restoreBulk', sheets }) });
+    msg.className='msg ok'; msg.textContent='Restore sent — check your sheet in a moment. · పునరుద్ధరణ పంపబడింది.';
+    await loadData();
+  }catch(err){
+    msg.className='msg err'; msg.style.display='block'; msg.textContent="Could not read that backup file. · ఫైల్ చదవలేకపోయాం.";
+  }
+  evt.target.value='';
+}
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
+
+// Prevent accidental scroll-wheel from changing focused number inputs (common desktop browser quirk)
+document.addEventListener('wheel', function(){
+  if(document.activeElement && document.activeElement.tagName==='INPUT' && document.activeElement.type==='number'){
+    document.activeElement.blur();
+  }
+}, { passive:true });
+</script>
+</body>
+</html>
