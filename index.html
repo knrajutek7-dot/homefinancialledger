@@ -135,18 +135,25 @@
   .empty{text-align:center; color:var(--text-soft); padding:28px 10px; font-size:13px;}
   .person-tag{display:inline-block; font-size:10px; font-weight:700; padding:1.5px 8px; border-radius:10px; background:var(--card-2); color:var(--text-soft); margin-left:6px;}
 
-  /* ---------- Budget form ---------- */
-  .budget-row{margin-bottom:14px;}
-  .budget-row .name{font-weight:600; font-size:13.5px; margin-bottom:1px; display:block;}
-  .budget-row .bi{display:block; font-size:11px; color:var(--text-soft); font-weight:400; margin-bottom:6px;}
-  .budget-row input{width:150px;}
+  /* ---------- Budget rows ---------- */
+  .budget-row{margin-bottom:12px; background:var(--card-2); border:1px solid var(--line); border-radius:14px; padding:14px 16px;}
+  .budget-row .row-top{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .budget-row .dot{width:11px; height:11px; border-radius:50%; flex-shrink:0;}
+  .budget-row .name{font-weight:700; font-size:14px; display:block; color:var(--text);}
+  .budget-row .bi{display:block; font-size:11px; color:var(--text-soft); font-weight:400; margin-top:1px;}
+  .budget-row .amount-line{display:flex; align-items:center; gap:0;}
+  .budget-row .amount-line input{flex:1; min-width:0;}
+  .budget-row .rupee-prefix{background:var(--bg-2); border:1.5px solid var(--line); border-right:none; border-radius:11px 0 0 11px; padding:12px 0 12px 14px; font-weight:700; color:var(--text-soft); font-size:15px;}
+  .budget-row input{border-radius:0 11px 11px 0; border-left:none;}
+  .budget-row .spent-note{font-size:11.5px; color:var(--text-soft); margin-top:8px;}
+  .budget-row .spent-note b{color:var(--text);}
 
   /* ---------- Bottom nav ---------- */
-  nav.bottom{position:fixed; bottom:0; left:0; right:0; background:rgba(20,28,24,0.92); backdrop-filter:blur(14px); border-top:1px solid var(--line); display:flex; justify-content:space-around; padding:8px 0 calc(9px + env(safe-area-inset-bottom)); max-width:640px; margin:0 auto;}
-  nav.bottom button{background:none; border:none; font-family:inherit; font-size:9.5px; font-weight:700; color:var(--text-soft); display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; padding:4px 6px; line-height:1.2;}
+  nav.bottom{position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--line); display:flex; justify-content:space-around; padding:8px 0 calc(9px + env(safe-area-inset-bottom)); max-width:640px; margin:0 auto; box-shadow:0 -4px 16px rgba(0,0,0,0.25);}
+  nav.bottom button{background:none; border:none; font-family:inherit; font-size:9.5px; font-weight:700; color:var(--text); opacity:0.6; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; padding:4px 6px; line-height:1.2;}
   nav.bottom button .ic{font-size:18px;}
-  nav.bottom button.active{color:var(--accent);}
-  nav.bottom button .bi{font-weight:400; font-size:8.5px; opacity:0.8;}
+  nav.bottom button.active{color:var(--accent); opacity:1;}
+  nav.bottom button .bi{font-weight:400; font-size:8.5px; opacity:0.85;}
 
   .view{display:none;} .view.active{display:block;}
 
@@ -287,7 +294,10 @@
       <h2 class="section">Expenses by category<span class="bi">వర్గం వారీగా ఖర్చులు</span></h2>
       <div id="catDonut"></div>
 
-      <h2 class="section">Recent entries<span class="bi">ఇటీవలి నమోదులు</span></h2>
+      <h2 class="section" style="justify-content:space-between;">
+        <span>Recent entries<span class="bi">ఇటీవలి నమోదులు</span></span>
+        <button class="secondary" style="width:auto; margin:0; padding:8px 14px; font-size:12px;" onclick="showView('reports')">View all →</button>
+      </h2>
       <div id="recentList"></div>
     </div>
 
@@ -767,7 +777,7 @@ function render(){
   ].sort((a,b)=> new Date(b.Date) - new Date(a.Date));
 
   const recentEl = document.getElementById('recentList');
-  recentEl.innerHTML = all.length ? all.slice(0,6).map(r=>rowHtml(r,true)).join('') : `<div class="empty">Nothing here yet — add your first entry below.<br>ఇంకా ఏమీ లేదు.</div>`;
+  recentEl.innerHTML = all.length ? all.slice(0,10).map(r=>rowHtml(r,true)).join('') : `<div class="empty">Nothing here yet — add your first entry below.<br>ఇంకా ఏమీ లేదు.</div>`;
 
   renderDueBills();
 }
@@ -863,11 +873,27 @@ function renderBudgetForm(){
   const el = document.getElementById('budgetForm');
   const budgetMap = {};
   (DATA.budgets||[]).forEach(b=>{ budgetMap[b.Category] = Number(b.MonthlyLimit||0); });
-  el.innerHTML = CATEGORIES.expense.map(cat=>`
+
+  const spentMap = {};
+  (DATA.expenses||[]).filter(r=>inCurrentMonth(r.Date)).forEach(r=>{
+    spentMap[r.Category] = (spentMap[r.Category]||0) + Number(r.Amount||0);
+  });
+
+  el.innerHTML = CATEGORIES.expense.map(cat=>{
+    const spent = spentMap[cat] || 0;
+    return `
     <div class="budget-row" data-cat="${cat}">
-      <span class="name">${cat}</span><span class="bi">${CATEGORY_TE[cat]||''}</span>
-      <input type="number" min="0" step="1" value="${budgetMap[cat]||0}" class="budget-input">
-    </div>`).join('');
+      <div class="row-top">
+        <span class="dot" style="background:${CATEGORY_COLOR[cat]||'#8FA398'}"></span>
+        <div><span class="name">${cat}</span><span class="bi">${CATEGORY_TE[cat]||''}</span></div>
+      </div>
+      <div class="amount-line">
+        <span class="rupee-prefix">₹</span>
+        <input type="number" min="0" step="1" value="${budgetMap[cat]||0}" class="budget-input">
+      </div>
+      ${spent>0 ? `<div class="spent-note">Spent this month: <b>${money(spent)}</b> · ఈ నెల ఖర్చు</div>` : ''}
+    </div>`;
+  }).join('');
 }
 async function saveBudgets(){
   const rows = document.querySelectorAll('#budgetForm .budget-row');
@@ -1227,6 +1253,13 @@ async function restoreBackup(evt){
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
 }
+
+// Prevent accidental scroll-wheel from changing focused number inputs (common desktop browser quirk)
+document.addEventListener('wheel', function(){
+  if(document.activeElement && document.activeElement.tagName==='INPUT' && document.activeElement.type==='number'){
+    document.activeElement.blur();
+  }
+}, { passive:true });
 </script>
 </body>
 </html>
