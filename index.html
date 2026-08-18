@@ -28,12 +28,14 @@
     --warn:#FF9F1C; --danger:#FF5C4D;
     --grad: linear-gradient(135deg,#EFC65E 0%,#B8860B 100%);
     --nav-bg:rgba(10,14,26,0.82);
-    --glass-bg:rgba(20,27,46,0.55);
+    --glass-bg:rgba(20,27,46,0.72);
     --glass-border:rgba(212,167,44,0.25);
     --glow:0 0 22px rgba(224,178,61,0.35);
     --glow-strong:0 0 34px rgba(224,178,61,0.55);
     --income:#3ECF8E;
     --income-glow:0 0 16px rgba(62,207,142,0.4);
+    --tag-person-bg:rgba(139,127,232,0.18); --tag-person-border:rgba(139,127,232,0.42); --tag-person-text:#C8C1FF;
+    --tag-payment-bg:rgba(62,207,142,0.16); --tag-payment-border:rgba(62,207,142,0.4); --tag-payment-text:#6FE3AC;
   }
   body.light-theme{
     --bg:#F7F3E8; --bg-2:#EFE8D6;
@@ -44,12 +46,14 @@
     --warn:#C9720E; --danger:#C43B2E;
     --grad: linear-gradient(135deg,#D9A62B 0%,#A8790A 100%);
     --nav-bg:rgba(255,255,255,0.85);
-    --glass-bg:rgba(255,255,255,0.6);
+    --glass-bg:rgba(255,255,255,0.78);
     --glass-border:rgba(184,134,11,0.28);
     --glow:0 0 18px rgba(184,134,11,0.22);
     --glow-strong:0 0 28px rgba(184,134,11,0.35);
     --income:#1E9E5C;
     --income-glow:0 0 14px rgba(30,158,92,0.28);
+    --tag-person-bg:rgba(90,70,200,0.12); --tag-person-border:rgba(90,70,200,0.35); --tag-person-text:#5A3FC0;
+    --tag-payment-bg:rgba(20,140,80,0.10); --tag-payment-border:rgba(20,140,80,0.32); --tag-payment-text:#187C48;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{height:100%;}
@@ -155,7 +159,8 @@
   .ledger-row .right .amt.inc{color:var(--income);} .ledger-row .right .amt.sav{color:var(--accent);} .ledger-row .right .amt.exp{color:var(--danger);}
   .del-btn{border:none; background:none; color:var(--text-soft); cursor:pointer; font-size:15px; padding:2px 6px;}
   .empty{text-align:center; color:var(--text-soft); padding:28px 10px; font-size:13px;}
-  .person-tag{display:inline-block; font-size:10px; font-weight:700; padding:1.5px 8px; border-radius:4px; background:var(--card-2); color:var(--text-soft); margin-left:6px;}
+  .person-tag{display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:4px; background:var(--tag-person-bg); border:1px solid var(--tag-person-border); color:var(--tag-person-text); margin-left:6px;}
+  .payment-tag{display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:4px; background:var(--tag-payment-bg); border:1px solid var(--tag-payment-border); color:var(--tag-payment-text); margin-left:6px;}
 
   /* ---------- Budget rows ---------- */
   .budget-row{margin-bottom:12px; background:var(--glass-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--glass-border); border-radius:5px; padding:14px 16px;}
@@ -917,7 +922,7 @@ function render(){
 function rowHtml(r, showActions){
   const sign = r._type==='income' ? '+' : '−';
   const dateStr = r.Date ? new Date(r.Date).toLocaleDateString('en-IN',{day:'2-digit',month:'short'}) : '';
-  const paymentBadge = r.PaymentMode ? `<span class="person-tag">${PAYMENT_MODE_ICON[r.PaymentMode]||''} ${r.PaymentMode}</span>` : '';
+  const paymentBadge = r.PaymentMode ? `<span class="payment-tag">${PAYMENT_MODE_ICON[r.PaymentMode]||''} ${r.PaymentMode}</span>` : '';
   return `<div class="ledger-row">
     <div class="left">
       <div class="cat">${catBI(r._cat)||''}${r.Person?`<span class="person-tag">${personLabel(r.Person)}</span>`:''}${paymentBadge}</div>
