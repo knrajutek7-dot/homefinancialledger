@@ -32,6 +32,8 @@
     --glass-border:rgba(212,167,44,0.25);
     --glow:0 0 22px rgba(224,178,61,0.35);
     --glow-strong:0 0 34px rgba(224,178,61,0.55);
+    --income:#3ECF8E;
+    --income-glow:0 0 16px rgba(62,207,142,0.4);
   }
   body.light-theme{
     --bg:#F7F3E8; --bg-2:#EFE8D6;
@@ -46,6 +48,8 @@
     --glass-border:rgba(184,134,11,0.28);
     --glow:0 0 18px rgba(184,134,11,0.22);
     --glow-strong:0 0 28px rgba(184,134,11,0.35);
+    --income:#1E9E5C;
+    --income-glow:0 0 14px rgba(30,158,92,0.28);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{height:100%;}
@@ -93,7 +97,7 @@
   .stat{background:var(--glass-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--glass-border); border-radius:5px; padding:12px 8px; text-align:center;}
   .stat .k{font-size:10px; color:var(--text-soft); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:5px; line-height:1.3;}
   .stat .v{font-family:'IBM Plex Mono',monospace; font-size:14.5px; font-weight:700;}
-  .stat.inc .v{color:var(--accent);} .stat.exp .v{color:var(--danger);} .stat.sav .v{color:var(--warn);}
+  .stat.inc .v{color:var(--income);} .stat.exp .v{color:var(--danger);} .stat.sav .v{color:var(--accent);}
 
   h2.section{font-family:'Fraunces',serif; font-size:16px; font-weight:600; margin:22px 0 12px; display:flex; align-items:baseline; gap:8px;}
   h2.section .bi{font-family:'Inter'; font-weight:400; font-size:11.5px; color:var(--text-soft);}
@@ -124,6 +128,7 @@
   .type-toggle button{flex:1; padding:10px 4px; border-radius:4px; border:none; background:transparent; font-family:inherit; font-weight:700; font-size:12.5px; color:var(--text-soft); cursor:pointer; line-height:1.25;}
   .type-toggle button .bi{display:block; font-weight:400; font-size:10px; opacity:0.85;}
   .type-toggle button.active{background:var(--accent); color:#1A1206;}
+  #tb-income.active{background:var(--income); box-shadow:var(--income-glow);}
 
   label{display:block; font-size:11.5px; font-weight:700; color:var(--text-soft); margin:14px 0 6px; text-transform:uppercase; letter-spacing:0.03em;}
   label .bi{text-transform:none; font-weight:400; opacity:0.8;}
@@ -142,11 +147,12 @@
   .msg.err{display:block; background:rgba(255,110,110,0.12); color:var(--danger);}
 
   /* ---------- Ledger rows ---------- */
-  .ledger-row{display:flex; justify-content:space-between; align-items:center; padding:12px 4px; border-bottom:1px solid var(--line); font-size:13.5px;}
+  .ledger-row{display:flex; justify-content:space-between; align-items:center; padding:13px 14px; margin-bottom:9px; font-size:13.5px; background:var(--glass-bg); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border:1px solid var(--glass-border); border-radius:4px; transition:box-shadow 0.15s, border-color 0.15s;}
+  .ledger-row:hover{border-color:var(--accent); box-shadow:0 0 14px rgba(224,178,61,0.18);}
   .ledger-row .left .cat{font-weight:600;}
   .ledger-row .left .sub{font-size:11.5px; color:var(--text-soft); margin-top:1px;}
   .ledger-row .right{display:flex; align-items:center; gap:10px;}
-  .ledger-row .right .amt.inc{color:var(--accent);} .ledger-row .right .amt.sav{color:var(--warn);} .ledger-row .right .amt.exp{color:var(--danger);}
+  .ledger-row .right .amt.inc{color:var(--income);} .ledger-row .right .amt.sav{color:var(--accent);} .ledger-row .right .amt.exp{color:var(--danger);}
   .del-btn{border:none; background:none; color:var(--text-soft); cursor:pointer; font-size:15px; padding:2px 6px;}
   .empty{text-align:center; color:var(--text-soft); padding:28px 10px; font-size:13px;}
   .person-tag{display:inline-block; font-size:10px; font-weight:700; padding:1.5px 8px; border-radius:4px; background:var(--card-2); color:var(--text-soft); margin-left:6px;}
@@ -168,10 +174,10 @@
   .budget-save-bar .msg{margin-top:8px;}
 
   /* ---------- Bottom nav ---------- */
-  nav.bottom{position:fixed; bottom:0; left:0; right:0; background:var(--nav-bg); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); border-top:1px solid var(--glass-border); display:flex; justify-content:space-around; padding:8px 0 calc(9px + env(safe-area-inset-bottom)); max-width:640px; margin:0 auto; box-shadow:0 -6px 24px rgba(0,0,0,0.4); z-index:20;}
-  nav.bottom button{background:none; border:none; font-family:inherit; font-size:9.5px; font-weight:700; color:var(--text); opacity:0.6; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; padding:4px 6px; line-height:1.2;}
+  nav.bottom{position:fixed; bottom:0; left:0; right:0; background:var(--nav-bg); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); border-top:1px solid var(--glass-border); display:flex; justify-content:space-around; gap:6px; padding:10px 8px calc(10px + env(safe-area-inset-bottom)); max-width:640px; margin:0 auto; box-shadow:0 -6px 24px rgba(0,0,0,0.4); z-index:20;}
+  nav.bottom button{flex:1; background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:4px; font-family:inherit; font-size:9.5px; font-weight:700; color:var(--text); opacity:0.72; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; padding:8px 4px 7px; line-height:1.2; transition:box-shadow 0.15s, border-color 0.15s, background 0.15s;}
   nav.bottom button .ic{font-size:18px;}
-  nav.bottom button.active{color:var(--accent); opacity:1; text-shadow:0 0 12px rgba(224,178,61,0.6);}
+  nav.bottom button.active{color:var(--accent); opacity:1; background:rgba(224,178,61,0.14); border-color:var(--accent); box-shadow:var(--glow);}
   nav.bottom button .bi{font-weight:400; font-size:8.5px; opacity:0.85;}
 
   .view{display:none;} .view.active{display:block;}
@@ -212,6 +218,11 @@
   .install-card .t1{font-weight:800; font-size:14px;}
   .install-card .t2{font-size:11.5px; opacity:0.85; margin-top:1px;}
   .install-card button{margin-top:12px; background:#1A1206; color:#fff; border:none; padding:10px 16px; border-radius:4px; font-weight:700; font-size:13px; cursor:pointer;}
+
+  /* ---------- Toast ---------- */
+  .toast{position:fixed; left:50%; bottom:calc(80px + env(safe-area-inset-bottom)); transform:translateX(-50%) translateY(16px); background:var(--card); border:1.5px solid var(--income); color:var(--text); padding:13px 22px; border-radius:5px; box-shadow:var(--income-glow); font-size:13.5px; font-weight:700; z-index:100; opacity:0; pointer-events:none; transition:opacity 0.25s, transform 0.25s; max-width:88%; text-align:center;}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto;}
+  .toast.error{border-color:var(--danger); box-shadow:0 0 16px rgba(255,92,77,0.35);}
   /* ---------- Trend chart ---------- */
   .trend-wrap{display:flex; justify-content:space-between; align-items:flex-end; height:130px; background:var(--glass-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--glass-border); border-radius:6px; padding:14px 10px 10px; gap:6px;}
   .trend-col{flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;}
@@ -343,11 +354,14 @@
           <input type="date" id="f-date" required>
 
           <label id="f-cat-label">Source <span class="bi">మూలం</span></label>
-          <select id="f-cat" required></select>
+          <select id="f-cat" onchange="onCategoryChange()" required></select>
 
           <div id="subcatWrap" class="hidden">
-            <label>Sub-category (optional) <span class="bi">ఉప-వర్గం</span></label>
-            <input id="f-subcat">
+            <label>Sub-category <span class="bi">ఉప-వర్గం</span></label>
+            <select id="f-subcat" onchange="toggleSubcatOther()"></select>
+            <div id="subcatOtherWrap" class="hidden" style="margin-top:10px;">
+              <input id="f-subcat-other" placeholder="Type sub-category · టైప్ చేయండి">
+            </div>
           </div>
 
           <div id="paymentWrap" class="hidden">
@@ -483,6 +497,8 @@
   <button data-v="settings" onclick="showView('settings')"><span class="ic">⚙️</span>Settings<span class="bi">సెట్టింగ్‌లు</span></button>
 </nav>
 
+<div id="toast" class="toast hidden"></div>
+
 <script>
 /* ---------- CONFIG ---------- */
 const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbwXRuQY7kt3P5NsiNpdeaDE3oWsw5d4yIVy4jhqcGBOKz1KPtFB1kqsRwko98jvLUsdYA/exec';
@@ -494,7 +510,7 @@ const PROFILE_LABEL = { Nagaraju:'Nagaraju', Vimala:'Vimala' };
 const CATEGORIES = {
   income: ["Salary / Wages","Business Income","Rental Income","Interest / Investment Returns","Other Income"],
   expense: ["Housing","Utilities","Groceries & Food","Transportation","Health","Education","Personal Care","Entertainment","Festivals & Gifts","Loans/EMIs","Miscellaneous"],
-  savings: ["Bank Savings","Fixed Deposit / RD","Gold","Mutual Funds / SIP","Chit Funds","Emergency Fund","Other Investments"]
+  savings: ["Bank Savings","Fixed Deposit / RD","Gold","Mutual Funds / SIP","Chit Funds","Postal Deposit","Sukanya Samriddhi","Emergency Fund","Other Investments"]
 };
 const SHEET_NAME = { income:"Income", expense:"Expenses", savings:"Savings" };
 const REVERSE_SHEET = { Income:"income", Expenses:"expense", Savings:"savings" };
@@ -504,6 +520,34 @@ const PAYMENT_MODE_TE = { "Cash":"నగదు", "UPI":"UPI", "Net Banking":"న
 const PAYMENT_MODE_ICON = { "Cash":"💵", "UPI":"📱", "Net Banking":"🏦", "Credit Card":"💳" };
 function paymentBI(p){ return PAYMENT_MODE_TE[p] ? `${p} · ${PAYMENT_MODE_TE[p]}` : p; }
 
+const SUBCATEGORIES = {
+  "Housing": ["Rent","Home Loan EMI","Maintenance","Repairs","Others"],
+  "Utilities": ["Electricity","Water","Gas","Internet/Mobile","Others"],
+  "Groceries & Food": ["Groceries","Vegetables/Fruits","Milk/Dairy","Eating Out","Sweets/Snacks","Others"],
+  "Transportation": ["Fuel","Vehicle Maintenance","Public Transport","Cab/Auto","Others"],
+  "Health": ["Medicines","Doctor Visit","Hospital","Insurance Premium","Others"],
+  "Education": ["School/College Fees","Books","Tuition","Others"],
+  "Personal Care": ["Clothing","Salon","Cosmetics","Others"],
+  "Entertainment": ["Movies","Subscriptions","Outings","Others"],
+  "Festivals & Gifts": ["Festival Shopping","Gifts","Donations","Others"],
+  "Loans/EMIs": ["Personal Loan","Home Loan","Vehicle Loan","Credit Card Bill","Dwaraka","Others"],
+  "Miscellaneous": ["Others"]
+};
+const SUBCATEGORY_TE = {
+  "Rent":"అద్దె","Home Loan EMI":"గృహ రుణం EMI","Maintenance":"నిర్వహణ","Repairs":"మరమ్మతులు",
+  "Electricity":"విద్యుత్","Water":"నీరు","Gas":"గ్యాస్","Internet/Mobile":"ఇంటర్నెట్/మొబైల్",
+  "Groceries":"కిరాణా","Vegetables/Fruits":"కూరగాయలు/పండ్లు","Milk/Dairy":"పాలు/పాల ఉత్పత్తులు","Eating Out":"బయట తినడం","Sweets/Snacks":"తీపి/స్నాక్స్",
+  "Fuel":"ఇంధనం","Vehicle Maintenance":"వాహన నిర్వహణ","Public Transport":"ప్రజా రవాణా","Cab/Auto":"క్యాబ్/ఆటో",
+  "Medicines":"మందులు","Doctor Visit":"డాక్టర్ సందర్శన","Hospital":"హాస్పిటల్","Insurance Premium":"బీమా ప్రీమియం",
+  "School/College Fees":"స్కూల్/కాలేజ్ ఫీజు","Books":"పుస్తకాలు","Tuition":"ట్యూషన్",
+  "Clothing":"దుస్తులు","Salon":"సెలూన్","Cosmetics":"కాస్మెటిక్స్",
+  "Movies":"సినిమాలు","Subscriptions":"సబ్‌స్క్రిప్షన్‌లు","Outings":"అవుటింగ్‌లు",
+  "Festival Shopping":"పండుగ షాపింగ్","Gifts":"బహుమతులు","Donations":"విరాళాలు",
+  "Personal Loan":"వ్యక్తిగత రుణం","Home Loan":"గృహ రుణం","Vehicle Loan":"వాహన రుణం","Credit Card Bill":"క్రెడిట్ కార్డ్ బిల్లు","Dwaraka":"ద్వారక",
+  "Others":"ఇతరులు"
+};
+function subcatBI(s){ return SUBCATEGORY_TE[s] ? `${s} · ${SUBCATEGORY_TE[s]}` : s; }
+
 const CATEGORY_TE = {
   "Salary / Wages":"జీతం / వేతనం","Business Income":"వ్యాపార ఆదాయం","Rental Income":"అద్దె ఆదాయం",
   "Interest / Investment Returns":"వడ్డీ / పెట్టుబడి రాబడి","Other Income":"ఇతర ఆదాయం",
@@ -511,7 +555,7 @@ const CATEGORY_TE = {
   "Health":"ఆరోగ్యం","Education":"విద్య","Personal Care":"వ్యక్తిగత సంరక్షణ","Entertainment":"వినోదం",
   "Festivals & Gifts":"పండుగలు & బహుమతులు","Loans/EMIs":"అప్పులు / EMIలు","Miscellaneous":"ఇతరాలు",
   "Bank Savings":"బ్యాంక్ పొదుపు","Fixed Deposit / RD":"ఫిక్స్‌డ్ డిపాజిట్ / RD","Gold":"బంగారం",
-  "Mutual Funds / SIP":"మ్యూచువల్ ఫండ్స్ / SIP","Chit Funds":"చిట్ ఫండ్స్","Emergency Fund":"అత్యవసర నిధి","Other Investments":"ఇతర పెట్టుబడులు"
+  "Mutual Funds / SIP":"మ్యూచువల్ ఫండ్స్ / SIP","Chit Funds":"చిట్ ఫండ్స్","Postal Deposit":"పోస్టల్ డిపాజిట్","Sukanya Samriddhi":"సుకన్య సమృద్ధి","Emergency Fund":"అత్యవసర నిధి","Other Investments":"ఇతర పెట్టుబడులు"
 };
 const CATEGORY_COLOR = {
   "Housing":"#17D89A","Utilities":"#0EA5A0","Groceries & Food":"#F5B944","Transportation":"#FF6E6E",
@@ -522,6 +566,15 @@ function catBI(c){ return CATEGORY_TE[c] ? `${c} · ${CATEGORY_TE[c]}` : c; }
 function personLabel(p){ return PROFILE_LABEL[p] || p; }
 
 function money(n){ n=Number(n)||0; return '₹'+n.toLocaleString('en-IN',{maximumFractionDigits:0}); }
+
+let toastTimer = null;
+function showToast(message, type){
+  const el = document.getElementById('toast');
+  el.textContent = message;
+  el.className = 'toast show' + (type==='error' ? ' error' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ el.className = 'toast hidden'; }, 2600);
+}
 
 function setTheme(theme){
   document.body.classList.toggle('light-theme', theme==='light');
@@ -626,6 +679,36 @@ function bootApp(){
 
 function buildCategorySelect(){
   document.getElementById('f-cat').innerHTML = CATEGORIES[entryType].map(c=>`<option value="${c}">${catBI(c)}</option>`).join('');
+  if(entryType==='expense') buildSubcategorySelect();
+}
+function onCategoryChange(){
+  if(entryType==='expense') buildSubcategorySelect();
+}
+function buildSubcategorySelect(){
+  const cat = document.getElementById('f-cat').value;
+  const list = SUBCATEGORIES[cat] || ['Others'];
+  document.getElementById('f-subcat').innerHTML = list.map(s=>`<option value="${s}">${subcatBI(s)}</option>`).join('');
+  toggleSubcatOther();
+}
+function toggleSubcatOther(){
+  const val = document.getElementById('f-subcat').value;
+  document.getElementById('subcatOtherWrap').classList.toggle('hidden', val !== 'Others');
+}
+function setSubcategoryValue(value){
+  buildSubcategorySelect();
+  const select = document.getElementById('f-subcat');
+  const options = Array.from(select.options).map(o=>o.value);
+  if(value && options.includes(value)){
+    select.value = value;
+    document.getElementById('subcatOtherWrap').classList.add('hidden');
+  } else if(value){
+    select.value = 'Others';
+    document.getElementById('subcatOtherWrap').classList.remove('hidden');
+    document.getElementById('f-subcat-other').value = value;
+  } else {
+    select.selectedIndex = 0;
+    document.getElementById('subcatOtherWrap').classList.add('hidden');
+  }
 }
 function buildPaymentSelect(){
   document.getElementById('f-payment').innerHTML = PAYMENT_MODES.map(p=>`<option value="${p}">${PAYMENT_MODE_ICON[p]} ${paymentBI(p)}</option>`).join('');
@@ -687,7 +770,7 @@ function editEntry(sheetName, rowIndex){
   document.getElementById('f-person').value = row.Person || currentUser;
   document.getElementById('f-date').value = row.Date ? new Date(row.Date).toISOString().slice(0,10) : new Date().toISOString().slice(0,10);
   document.getElementById('f-cat').value = key==='income' ? row.Source : key==='expense' ? row.Category : row.Type;
-  if(key==='expense') document.getElementById('f-subcat').value = row.SubCategory || '';
+  if(key==='expense') setSubcategoryValue(row.SubCategory || '');
   if(key!=='income') document.getElementById('f-payment').value = row.PaymentMode || PAYMENT_MODES[0];
   document.getElementById('f-amount').value = row.Amount || '';
   document.getElementById('f-notes').value = row.Notes || '';
@@ -812,7 +895,7 @@ function rowHtml(r, showActions){
   return `<div class="ledger-row">
     <div class="left">
       <div class="cat">${catBI(r._cat)||''}${r.Person?`<span class="person-tag">${personLabel(r.Person)}</span>`:''}${paymentBadge}</div>
-      <div class="sub">${dateStr}${r.Notes ? ' · '+r.Notes : ''}${r.SubCategory ? ' · '+catBI(r.SubCategory) : ''}</div>
+      <div class="sub">${dateStr}${r.Notes ? ' · '+r.Notes : ''}${r.SubCategory ? ' · '+subcatBI(r.SubCategory) : ''}</div>
     </div>
     <div class="right">
       <div class="amt ${r._type==='income'?'inc':r._type==='savings'?'sav':'exp'}">${sign}${money(r.Amount)}</div>
@@ -833,7 +916,8 @@ async function submitEntry(e){
   const cat = document.getElementById('f-cat').value;
   const amount = document.getElementById('f-amount').value;
   const notes = document.getElementById('f-notes').value;
-  const subcat = document.getElementById('f-subcat').value;
+  const subcatRaw = document.getElementById('f-subcat').value;
+  const subcat = subcatRaw==='Others' ? (document.getElementById('f-subcat-other').value.trim() || 'Others') : subcatRaw;
   const payment = entryType !== 'income' ? document.getElementById('f-payment').value : '';
   const isSplit = entryType==='expense' && !editingContext && document.getElementById('f-split').checked;
 
@@ -864,6 +948,7 @@ async function submitEntry(e){
         body: JSON.stringify({ action:'add', sheet: SHEET_NAME[entryType], row }) });
     }
     msg.className='msg ok'; msg.textContent = editingContext ? 'Entry updated. · నవీకరించబడింది.' : 'Saved to your ledger. · సేవ్ అయ్యింది.';
+    showToast(editingContext ? '✅ Transaction updated successfully! · నవీకరించబడింది' : '✅ Transaction saved successfully! · విజయవంతంగా సేవ్ అయ్యింది');
     const wasEditing = !!editingContext;
     editingContext = null;
     document.getElementById('editBanner').classList.add('hidden');
@@ -877,6 +962,7 @@ async function submitEntry(e){
     setTimeout(()=>{ msg.className='msg'; msg.textContent=''; }, 2500);
   }catch(err){
     msg.className='msg err'; msg.textContent='Could not save — check your internet and try again. · సేవ్ కాలేదు.';
+    showToast('❌ Could not save — try again. · సేవ్ కాలేదు', 'error');
   }
   btn.disabled = false;
 }
@@ -927,6 +1013,7 @@ async function saveBudgets(){
     await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'},
       body: JSON.stringify({ action:'saveBudgets', budgets }) });
     msg.className='msg ok'; msg.textContent='Budget saved. · బడ్జెట్ సేవ్ అయ్యింది.';
+    showToast('✅ Budget saved successfully! · బడ్జెట్ సేవ్ అయ్యింది');
     await loadData();
     setTimeout(()=>{ msg.className='msg'; msg.textContent=''; }, 2500);
   }catch(err){ msg.className='msg err'; msg.textContent='Could not save. · సేవ్ కాలేదు.'; }
@@ -1176,7 +1263,7 @@ function payRecurring(rowIndex){
   setEntryType('expense');
   document.getElementById('f-person').value = bill.Person;
   document.getElementById('f-cat').value = bill.Category;
-  document.getElementById('f-subcat').value = bill.Name;
+  setSubcategoryValue(bill.Name);
   document.getElementById('f-payment').value = bill.PaymentMode || PAYMENT_MODES[0];
   document.getElementById('f-amount').value = bill.Amount;
   document.getElementById('f-notes').value = `${bill.Name} (recurring)`;
@@ -1200,7 +1287,7 @@ function applyFavorite(i){
   setEntryType(f.type);
   document.getElementById('f-person').value = f.person;
   document.getElementById('f-cat').value = f.category;
-  if(f.type==='expense') document.getElementById('f-subcat').value = f.subcategory || '';
+  if(f.type==='expense') setSubcategoryValue(f.subcategory || '');
   if(f.type!=='income') document.getElementById('f-payment').value = f.paymentMode || PAYMENT_MODES[0];
   document.getElementById('f-amount').value = f.amount || '';
   document.getElementById('f-notes').value = f.notes || '';
@@ -1214,11 +1301,16 @@ function removeFavorite(i){
 function saveCurrentAsFavorite(){
   const cat = document.getElementById('f-cat').value;
   const amount = document.getElementById('f-amount').value;
+  let subcatVal = '';
+  if(entryType==='expense'){
+    const raw = document.getElementById('f-subcat').value;
+    subcatVal = raw==='Others' ? (document.getElementById('f-subcat-other').value.trim() || 'Others') : raw;
+  }
   const favorite = {
     type: entryType,
     person: document.getElementById('f-person').value,
     category: cat,
-    subcategory: entryType==='expense' ? document.getElementById('f-subcat').value : '',
+    subcategory: subcatVal,
     paymentMode: entryType!=='income' ? document.getElementById('f-payment').value : '',
     amount: amount,
     notes: document.getElementById('f-notes').value,
