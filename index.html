@@ -238,8 +238,9 @@
   .trend-col{flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;}
   .trend-bars{display:flex; gap:3px; align-items:flex-end; height:88px; width:100%; justify-content:center;}
   .trend-bar{width:9px; border-radius:3px 3px 0 0; min-height:2px;}
-  .trend-bar.inc{background:var(--accent);}
+  .trend-bar.inc{background:var(--income);}
   .trend-bar.exp{background:var(--danger);}
+  .trend-bar.empty{height:4px; background:transparent; border:1px dashed var(--line); border-radius:3px 3px 0 0; align-self:flex-end;}
   .trend-label{font-size:10px; color:var(--text-soft); margin-top:7px;}
   .trend-legend{display:flex; gap:16px; justify-content:center; margin-top:10px; font-size:11.5px; color:var(--text-soft);}
   .trend-legend i{display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:5px; vertical-align:middle;}
@@ -1136,16 +1137,15 @@ function renderTrendChart(person){
   const maxVal = Math.max(1, ...months.map(m=>Math.max(incByMonth[m.key]||0, expByMonth[m.key]||0)));
   const cols = months.map(m=>{
     const inc = incByMonth[m.key]||0, exp = expByMonth[m.key]||0;
+    const incBar = inc>0 ? `<div class="trend-bar inc" style="height:${Math.max(6, inc/maxVal*100)}%"></div>` : `<div class="trend-bar empty"></div>`;
+    const expBar = exp>0 ? `<div class="trend-bar exp" style="height:${Math.max(6, exp/maxVal*100)}%"></div>` : `<div class="trend-bar empty"></div>`;
     return `<div class="trend-col">
-      <div class="trend-bars">
-        <div class="trend-bar inc" style="height:${Math.max(3, inc/maxVal*100)}%"></div>
-        <div class="trend-bar exp" style="height:${Math.max(3, exp/maxVal*100)}%"></div>
-      </div>
+      <div class="trend-bars">${incBar}${expBar}</div>
       <div class="trend-label">${m.label}</div>
     </div>`;
   }).join('');
   document.getElementById('trendChart').innerHTML = `<div class="trend-wrap">${cols}</div>
-    <div class="trend-legend"><span><i style="background:var(--accent)"></i>Income · ఆదాయం</span><span><i style="background:var(--danger)"></i>Expenses · ఖర్చులు</span></div>`;
+    <div class="trend-legend"><span><i style="background:var(--income)"></i>Income · ఆదాయం</span><span><i style="background:var(--danger)"></i>Expenses · ఖర్చులు</span></div>`;
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{
