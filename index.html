@@ -176,8 +176,13 @@
   /* ---------- Bottom nav ---------- */
   nav.bottom{position:fixed; bottom:0; left:0; right:0; background:var(--nav-bg); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); border-top:1px solid var(--glass-border); display:flex; justify-content:space-around; gap:6px; padding:10px 8px calc(10px + env(safe-area-inset-bottom)); max-width:640px; margin:0 auto; box-shadow:0 -6px 24px rgba(0,0,0,0.4); z-index:20;}
   nav.bottom button{flex:1; background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:4px; font-family:inherit; font-size:9.5px; font-weight:700; color:var(--text); opacity:0.72; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; padding:8px 4px 7px; line-height:1.2; transition:box-shadow 0.15s, border-color 0.15s, background 0.15s;}
+  nav.bottom button[data-v="dashboard"]{background:rgba(79,168,224,0.12); border-color:rgba(79,168,224,0.28);}
+  nav.bottom button[data-v="add"]{background:rgba(62,207,142,0.12); border-color:rgba(62,207,142,0.28);}
+  nav.bottom button[data-v="budget"]{background:rgba(232,119,159,0.12); border-color:rgba(232,119,159,0.28);}
+  nav.bottom button[data-v="reports"]{background:rgba(224,178,61,0.12); border-color:rgba(224,178,61,0.28);}
+  nav.bottom button[data-v="settings"]{background:rgba(139,127,232,0.12); border-color:rgba(139,127,232,0.28);}
   nav.bottom button .ic{font-size:18px;}
-  nav.bottom button.active{color:var(--accent); opacity:1; background:rgba(224,178,61,0.14); border-color:var(--accent); box-shadow:var(--glow);}
+  nav.bottom button.active{color:var(--accent); opacity:1; background:rgba(224,178,61,0.16); border-color:var(--accent); box-shadow:var(--glow);}
   nav.bottom button .bi{font-weight:400; font-size:8.5px; opacity:0.85;}
 
   .view{display:none;} .view.active{display:block;}
@@ -305,7 +310,7 @@
       <div class="hero">
         <div class="hero-top">
           <div>
-            <div class="label">Net this month<span class="bi-label">ఈ నెల నికరం</span></div>
+            <div class="label">Household net this month<span class="bi-label">కుటుంబం మొత్తం నికరం</span></div>
             <div class="value" id="netValue">₹0</div>
             <div class="month" id="monthLabel">—</div>
           </div>
@@ -639,15 +644,30 @@ function unlockAs(name){
   document.getElementById('userChipName').textContent = personLabel(name);
   document.getElementById('userAvLetter').textContent = name[0];
   bootApp();
+  resetInactivityTimer();
 }
-function lockApp(){
+function lockApp(autoLocked){
   currentUser = null;
+  clearTimeout(inactivityTimer);
   document.getElementById('app').classList.add('hidden');
   document.getElementById('bottomNav').classList.add('hidden');
   document.getElementById('lockStep1').classList.remove('hidden');
   document.getElementById('lockStep2').classList.add('hidden');
   document.getElementById('lockScreen').classList.remove('hidden');
+  if(autoLocked===true) showToast('🔒 Locked due to inactivity · నిష్క్రియత వల్ల లాక్ అయ్యింది');
 }
+
+/* ---------- AUTO-LOCK AFTER INACTIVITY ---------- */
+let inactivityTimer = null;
+const INACTIVITY_LIMIT_MS = 5 * 60 * 1000; // 5 minutes
+function resetInactivityTimer(){
+  if(!currentUser) return; // nothing to protect while already locked
+  clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(()=>{ lockApp(true); }, INACTIVITY_LIMIT_MS);
+}
+['click','touchstart','keydown','scroll','mousemove'].forEach(evt=>{
+  document.addEventListener(evt, resetInactivityTimer, { passive:true });
+});
 
 /* ---------- APP BOOT ---------- */
 let entryType = 'income';
@@ -862,12 +882,18 @@ function render(){
   document.getElementById('sumIncome').textContent = money(incomeTotal);
   document.getElementById('sumExpense').textContent = money(expenseTotal);
   document.getElementById('sumSavings').textContent = money(savingsTotal);
-  document.getElementById('netValue').textContent = money(incomeTotal - expenseTotal - savingsTotal);
+
+  // Net Balance always reflects the whole household, regardless of the
+  // Nagaraju/Vimala filter chip above — it isn't split per person.
+  const allIncThisMonth = DATA.income.filter(r=>inCurrentMonth(r.Date)).reduce((s,r)=>s+Number(r.Amount||0),0);
+  const allExpThisMonth = DATA.expenses.filter(r=>inCurrentMonth(r.Date)).reduce((s,r)=>s+Number(r.Amount||0),0);
+  const allSavThisMonth = DATA.savings.filter(r=>inCurrentMonth(r.Date)).reduce((s,r)=>s+Number(r.Amount||0),0);
+  document.getElementById('netValue').textContent = money(allIncThisMonth - allExpThisMonth - allSavThisMonth);
 
   const budgetMap = {};
   (DATA.budgets||[]).forEach(b=>{ budgetMap[b.Category] = Number(b.MonthlyLimit||0); });
   const totalBudget = Object.values(budgetMap).reduce((s,v)=>s+v,0);
-  document.getElementById('ringWrap').innerHTML = totalBudget>0 ? ringSvg(expenseTotal/totalBudget*100) : '';
+  document.getElementById('ringWrap').innerHTML = totalBudget>0 ? ringSvg(allExpThisMonth/totalBudget*100) : '';
 
   const byCat = {};
   exp.forEach(r=>{ byCat[r.Category] = (byCat[r.Category]||0) + Number(r.Amount||0); });
