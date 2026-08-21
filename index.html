@@ -527,9 +527,9 @@ const CATEGORIES = {
 const SHEET_NAME = { income:"Income", expense:"Expenses", savings:"Savings" };
 const REVERSE_SHEET = { Income:"income", Expenses:"expense", Savings:"savings" };
 
-const PAYMENT_MODES = ["Cash","UPI","Net Banking","Credit Card"];
-const PAYMENT_MODE_TE = { "Cash":"నగదు", "UPI":"UPI", "Net Banking":"నెట్ బ్యాంకింగ్", "Credit Card":"క్రెడిట్ కార్డ్" };
-const PAYMENT_MODE_ICON = { "Cash":"💵", "UPI":"📱", "Net Banking":"🏦", "Credit Card":"💳" };
+const PAYMENT_MODES = ["Cash","UPI","Net Banking","Credit Card","Auto Debit"];
+const PAYMENT_MODE_TE = { "Cash":"నగదు", "UPI":"UPI", "Net Banking":"నెట్ బ్యాంకింగ్", "Credit Card":"క్రెడిట్ కార్డ్", "Auto Debit":"ఆటో డెబిట్" };
+const PAYMENT_MODE_ICON = { "Cash":"💵", "UPI":"📱", "Net Banking":"🏦", "Credit Card":"💳", "Auto Debit":"🔄" };
 function paymentBI(p){ return PAYMENT_MODE_TE[p] ? `${p} · ${PAYMENT_MODE_TE[p]}` : p; }
 
 const SUBCATEGORIES = {
@@ -539,9 +539,9 @@ const SUBCATEGORIES = {
   "Transportation": ["Fuel","Vehicle Maintenance","Public Transport","Cab/Auto","Others"],
   "Health": ["Medicines","Doctor Visit","Hospital","Insurance Premium","Others"],
   "Education": ["School/College Fees","Books","Tuition","Others"],
-  "Personal Care": ["Clothing","Salon","Cosmetics","Others"],
+  "Personal Care": ["Clothing","Footwear","Salon","Cosmetics","Others"],
   "Entertainment": ["Movies","Subscriptions","Outings","Others"],
-  "Festivals & Gifts": ["Festival Shopping","Gifts","Donations","Others"],
+  "Festivals & Gifts": ["Festival Shopping","Pooja Items","Gifts","Donations","Others"],
   "Loans/EMIs": ["Personal Loan","Home Loan","Vehicle Loan","Credit Card Bill","Dwaraka","Others"],
   "Miscellaneous": ["Others"]
 };
@@ -552,9 +552,9 @@ const SUBCATEGORY_TE = {
   "Fuel":"ఇంధనం","Vehicle Maintenance":"వాహన నిర్వహణ","Public Transport":"ప్రజా రవాణా","Cab/Auto":"క్యాబ్/ఆటో",
   "Medicines":"మందులు","Doctor Visit":"డాక్టర్ సందర్శన","Hospital":"హాస్పిటల్","Insurance Premium":"బీమా ప్రీమియం",
   "School/College Fees":"స్కూల్/కాలేజ్ ఫీజు","Books":"పుస్తకాలు","Tuition":"ట్యూషన్",
-  "Clothing":"దుస్తులు","Salon":"సెలూన్","Cosmetics":"కాస్మెటిక్స్",
+  "Clothing":"దుస్తులు","Footwear":"పాదరక్షలు","Salon":"సెలూన్","Cosmetics":"కాస్మెటిక్స్",
   "Movies":"సినిమాలు","Subscriptions":"సబ్‌స్క్రిప్షన్‌లు","Outings":"అవుటింగ్‌లు",
-  "Festival Shopping":"పండుగ షాపింగ్","Gifts":"బహుమతులు","Donations":"విరాళాలు",
+  "Festival Shopping":"పండుగ షాపింగ్","Pooja Items":"పూజా సామాగ్రి","Gifts":"బహుమతులు","Donations":"విరాళాలు",
   "Personal Loan":"వ్యక్తిగత రుణం","Home Loan":"గృహ రుణం","Vehicle Loan":"వాహన రుణం","Credit Card Bill":"క్రెడిట్ కార్డ్ బిల్లు","Dwaraka":"ద్వారక",
   "Others":"ఇతరులు"
 };
@@ -1131,21 +1131,21 @@ function renderTrendChart(person){
     const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
     months.push({ key: d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'), label: d.toLocaleString('en-IN',{month:'short'}) });
   }
-  const incByMonth = {}, expByMonth = {};
+  const incByMonth = {}, expByMonth = {}, savByMonth = {};
   filterPerson(DATA.income, person).forEach(r=>{ const k=monthKey(r.Date); incByMonth[k]=(incByMonth[k]||0)+Number(r.Amount||0); });
   filterPerson(DATA.expenses, person).forEach(r=>{ const k=monthKey(r.Date); expByMonth[k]=(expByMonth[k]||0)+Number(r.Amount||0); });
-  const maxVal = Math.max(1, ...months.map(m=>Math.max(incByMonth[m.key]||0, expByMonth[m.key]||0)));
+  filterPerson(DATA.savings, person).forEach(r=>{ const k=monthKey(r.Date); savByMonth[k]=(savByMonth[k]||0)+Number(r.Amount||0); });
+  const maxVal = Math.max(1, ...months.map(m=>Math.max(incByMonth[m.key]||0, expByMonth[m.key]||0, savByMonth[m.key]||0)));
+  const makeBar = (val, cls) => val>0 ? `<div class="trend-bar ${cls}" style="height:${Math.max(6, val/maxVal*100)}%"></div>` : `<div class="trend-bar empty"></div>`;
   const cols = months.map(m=>{
-    const inc = incByMonth[m.key]||0, exp = expByMonth[m.key]||0;
-    const incBar = inc>0 ? `<div class="trend-bar inc" style="height:${Math.max(6, inc/maxVal*100)}%"></div>` : `<div class="trend-bar empty"></div>`;
-    const expBar = exp>0 ? `<div class="trend-bar exp" style="height:${Math.max(6, exp/maxVal*100)}%"></div>` : `<div class="trend-bar empty"></div>`;
+    const inc = incByMonth[m.key]||0, exp = expByMonth[m.key]||0, sav = savByMonth[m.key]||0;
     return `<div class="trend-col">
-      <div class="trend-bars">${incBar}${expBar}</div>
+      <div class="trend-bars">${makeBar(inc,'inc')}${makeBar(exp,'exp')}${makeBar(sav,'sav')}</div>
       <div class="trend-label">${m.label}</div>
     </div>`;
   }).join('');
   document.getElementById('trendChart').innerHTML = `<div class="trend-wrap">${cols}</div>
-    <div class="trend-legend"><span><i style="background:var(--income)"></i>Income · ఆదాయం</span><span><i style="background:var(--danger)"></i>Expenses · ఖర్చులు</span></div>`;
+    <div class="trend-legend"><span><i style="background:var(--income)"></i>Income · ఆదాయం</span><span><i style="background:var(--danger)"></i>Expenses · ఖర్చులు</span><span><i style="background:var(--accent)"></i>Savings · పొదుపు</span></div>`;
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{
