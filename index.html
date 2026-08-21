@@ -666,7 +666,7 @@ function lockApp(autoLocked){
 
 /* ---------- AUTO-LOCK AFTER INACTIVITY ---------- */
 let inactivityTimer = null;
-const INACTIVITY_LIMIT_MS = 5 * 60 * 1000; // 5 minutes
+const INACTIVITY_LIMIT_MS = 1 * 60 * 1000; // 5 minutes
 function resetInactivityTimer(){
   if(!currentUser) return; // nothing to protect while already locked
   clearTimeout(inactivityTimer);
