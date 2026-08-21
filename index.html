@@ -535,27 +535,27 @@ function paymentBI(p){ return PAYMENT_MODE_TE[p] ? `${p} · ${PAYMENT_MODE_TE[p]
 const SUBCATEGORIES = {
   "Housing": ["Rent","Home Loan EMI","Maintenance","Repairs","Others"],
   "Utilities": ["Electricity","Water","Gas","Internet/Mobile","Others"],
-  "Groceries & Food": ["Groceries","Vegetables/Fruits","Milk/Dairy","Eating Out","Sweets/Snacks","Others"],
+  "Groceries & Food": ["Groceries","Vegetables/Fruits","Non-Veg Items","Milk/Dairy","Eating Out","Sweets/Snacks","Others"],
   "Transportation": ["Fuel","Vehicle Maintenance","Public Transport","Cab/Auto","Others"],
   "Health": ["Medicines","Doctor Visit","Hospital","Insurance Premium","Others"],
   "Education": ["School/College Fees","Books","Tuition","Others"],
   "Personal Care": ["Clothing","Footwear","Salon","Cosmetics","Others"],
   "Entertainment": ["Movies","Subscriptions","Outings","Others"],
   "Festivals & Gifts": ["Festival Shopping","Pooja Items","Gifts","Donations","Others"],
-  "Loans/EMIs": ["Personal Loan","Home Loan","Vehicle Loan","Credit Card Bill","Dwakra","Others"],
+  "Loans/EMIs": ["Personal Loan","Home Loan","Vehicle Loan","Credit Card Bill","Dwaraka","Others"],
   "Miscellaneous": ["Others"]
 };
 const SUBCATEGORY_TE = {
   "Rent":"అద్దె","Home Loan EMI":"గృహ రుణం EMI","Maintenance":"నిర్వహణ","Repairs":"మరమ్మతులు",
   "Electricity":"విద్యుత్","Water":"నీరు","Gas":"గ్యాస్","Internet/Mobile":"ఇంటర్నెట్/మొబైల్",
-  "Groceries":"కిరాణా","Vegetables/Fruits":"కూరగాయలు/పండ్లు","Milk/Dairy":"పాలు/పాల ఉత్పత్తులు","Eating Out":"బయట తినడం","Sweets/Snacks":"తీపి/స్నాక్స్",
+  "Groceries":"కిరాణా","Vegetables/Fruits":"కూరగాయలు/పండ్లు","Non-Veg Items":"నాన్-వెజ్ ఐటమ్స్","Milk/Dairy":"పాలు/పాల ఉత్పత్తులు","Eating Out":"బయట తినడం","Sweets/Snacks":"తీపి/స్నాక్స్",
   "Fuel":"ఇంధనం","Vehicle Maintenance":"వాహన నిర్వహణ","Public Transport":"ప్రజా రవాణా","Cab/Auto":"క్యాబ్/ఆటో",
   "Medicines":"మందులు","Doctor Visit":"డాక్టర్ సందర్శన","Hospital":"హాస్పిటల్","Insurance Premium":"బీమా ప్రీమియం",
   "School/College Fees":"స్కూల్/కాలేజ్ ఫీజు","Books":"పుస్తకాలు","Tuition":"ట్యూషన్",
   "Clothing":"దుస్తులు","Footwear":"పాదరక్షలు","Salon":"సెలూన్","Cosmetics":"కాస్మెటిక్స్",
   "Movies":"సినిమాలు","Subscriptions":"సబ్‌స్క్రిప్షన్‌లు","Outings":"అవుటింగ్‌లు",
   "Festival Shopping":"పండుగ షాపింగ్","Pooja Items":"పూజా సామాగ్రి","Gifts":"బహుమతులు","Donations":"విరాళాలు",
-  "Personal Loan":"వ్యక్తిగత రుణం","Home Loan":"గృహ రుణం","Vehicle Loan":"వాహన రుణం","Credit Card Bill":"క్రెడిట్ కార్డ్ బిల్లు","Dwakra":"డ్వాక్ర ",
+  "Personal Loan":"వ్యక్తిగత రుణం","Home Loan":"గృహ రుణం","Vehicle Loan":"వాహన రుణం","Credit Card Bill":"క్రెడిట్ కార్డ్ బిల్లు","Dwaraka":"ద్వారక",
   "Others":"ఇతరులు"
 };
 function subcatBI(s){ return SUBCATEGORY_TE[s] ? `${s} · ${SUBCATEGORY_TE[s]}` : s; }
