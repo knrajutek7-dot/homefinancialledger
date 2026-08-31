@@ -165,6 +165,8 @@
 
   /* ---------- Budget rows ---------- */
   .budget-row{margin-bottom:12px; background:var(--glass-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid var(--glass-border); border-radius:5px; padding:14px 16px;}
+  .budget-row.sub-item{margin-left:20px; padding:11px 14px; opacity:0.92;}
+  .budget-row.sub-item .name{font-size:12.5px;}
   .budget-row .row-top{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
   .budget-row .dot{width:11px; height:11px; border-radius:50%; flex-shrink:0;}
   .budget-row .name{font-weight:700; font-size:14px; display:block; color:var(--text);}
@@ -543,7 +545,7 @@ const SUBCATEGORIES = {
   "Personal Care": ["Clothing","Footwear","Salon","Cosmetics","Others"],
   "Entertainment": ["Movies","Subscriptions","Outings","Others"],
   "Festivals & Gifts": ["Festival Shopping","Pooja Items","Gifts","Donations","Others"],
-  "Loans/EMIs": ["Personal Loan","Home Loan","Vehicle Loan","Credit Card Bill","Dwaraka","Others"],
+  "Loans/EMIs": ["Personal Loan","Home Loan","Vehicle Loan","Credit Card Bill Payment","Dwaraka","Others"],
   "Miscellaneous": ["Others"]
 };
 const SUBCATEGORY_TE = {
@@ -556,7 +558,7 @@ const SUBCATEGORY_TE = {
   "Clothing":"దుస్తులు","Footwear":"పాదరక్షలు","Salon":"సెలూన్","Cosmetics":"కాస్మెటిక్స్",
   "Movies":"సినిమాలు","Subscriptions":"సబ్‌స్క్రిప్షన్‌లు","Outings":"అవుటింగ్‌లు",
   "Festival Shopping":"పండుగ షాపింగ్","Pooja Items":"పూజా సామాగ్రి","Gifts":"బహుమతులు","Donations":"విరాళాలు",
-  "Personal Loan":"వ్యక్తిగత రుణం","Home Loan":"గృహ రుణం","Vehicle Loan":"వాహన రుణం","Credit Card Bill":"క్రెడిట్ కార్డ్ బిల్లు","Dwaraka":"ద్వారక",
+  "Personal Loan":"వ్యక్తిగత రుణం","Home Loan":"గృహ రుణం","Vehicle Loan":"వాహన రుణం","Credit Card Bill Payment":"క్రెడిట్ కార్డ్ బిల్లు చెల్లింపు","Dwaraka":"ద్వారక",
   "Others":"ఇతరులు"
 };
 function subcatBI(s){ return SUBCATEGORY_TE[s] ? `${s} · ${SUBCATEGORY_TE[s]}` : s; }
@@ -900,7 +902,12 @@ function render(){
 
   const budgetMap = {};
   (DATA.budgets||[]).forEach(b=>{ budgetMap[b.Category] = Number(b.MonthlyLimit||0); });
-  const totalBudget = Object.values(budgetMap).reduce((s,v)=>s+v,0);
+  // Exclude sub-items (e.g. Credit Card Bill Payment) from the total — their
+  // spending is already counted inside their parent category (Loans/EMIs),
+  // so including both would double-count against the ring.
+  const totalBudget = Object.entries(budgetMap)
+    .filter(([cat]) => !SUB_BUDGET_KEYS.includes(cat))
+    .reduce((s,[,v])=>s+v,0);
   document.getElementById('ringWrap').innerHTML = totalBudget>0 ? ringSvg(allExpThisMonth/totalBudget*100) : '';
 
   const byCat = {};
@@ -1012,14 +1019,21 @@ async function deleteEntry(sheet, rowIndex){
 }
 
 /* ---------- BUDGET ---------- */
+const SUB_BUDGET_ITEMS = [
+  { key: 'Credit Card Bill Payment', afterCategory: 'Loans/EMIs', bi: 'క్రెడిట్ కార్డ్ బిల్లు చెల్లింపు' }
+];
+const SUB_BUDGET_KEYS = SUB_BUDGET_ITEMS.map(s=>s.key);
+
 function renderBudgetForm(){
   const el = document.getElementById('budgetForm');
   const budgetMap = {};
   (DATA.budgets||[]).forEach(b=>{ budgetMap[b.Category] = Number(b.MonthlyLimit||0); });
 
   const spentMap = {};
+  const subSpentMap = {};
   (DATA.expenses||[]).filter(r=>inCurrentMonth(r.Date)).forEach(r=>{
     spentMap[r.Category] = (spentMap[r.Category]||0) + Number(r.Amount||0);
+    if(r.SubCategory) subSpentMap[r.SubCategory] = (subSpentMap[r.SubCategory]||0) + Number(r.Amount||0);
   });
   const receivedMap = {};
   (DATA.income||[]).filter(r=>inCurrentMonth(r.Date)).forEach(r=>{
@@ -1030,14 +1044,12 @@ function renderBudgetForm(){
     savedMap[r.Type] = (savedMap[r.Type]||0) + Number(r.Amount||0);
   });
 
-  function group(title, biTitle, categories, amountMap, dotColor, noteLabel){
-    const rows = categories.map(cat=>{
-      const amt = amountMap[cat] || 0;
-      return `
-      <div class="budget-row" data-cat="${cat}">
+  function budgetRowHtml(cat, label, biLabel, amt, dotColor, noteLabel, indent){
+    return `
+      <div class="budget-row${indent?' sub-item':''}" data-cat="${cat}">
         <div class="row-top">
           <span class="dot" style="background:${dotColor}"></span>
-          <div><span class="name">${cat}</span><span class="bi">${CATEGORY_TE[cat]||''}</span></div>
+          <div><span class="name">${label}</span><span class="bi">${biLabel||''}</span></div>
         </div>
         <div class="amount-line">
           <span class="rupee-prefix">₹</span>
@@ -1045,19 +1057,34 @@ function renderBudgetForm(){
         </div>
         ${amt>0 ? `<div class="spent-note">${noteLabel}: <b>${money(amt)}</b></div>` : ''}
       </div>`;
+  }
+
+  function group(title, biTitle, categories, amountMap, dotColor, noteLabel, withSubItems){
+    const rows = categories.map(cat=>{
+      let html = budgetRowHtml(cat, cat, CATEGORY_TE[cat]||'', amountMap[cat]||0, dotColor, noteLabel, false);
+      if(withSubItems){
+        SUB_BUDGET_ITEMS.filter(s=>s.afterCategory===cat).forEach(s=>{
+          html += budgetRowHtml(s.key, s.key, s.bi, subSpentMap[s.key]||0, dotColor, 'Spent this month · ఈ నెల ఖర్చు', true);
+        });
+      }
+      return html;
     }).join('');
     return `<h2 class="section">${title}<span class="bi">${biTitle}</span></h2>${rows}`;
   }
 
   el.innerHTML =
     group('Income targets','ఆదాయ లక్ష్యాలు', CATEGORIES.income, receivedMap, 'var(--income)', 'Received this month · ఈ నెల వచ్చింది') +
-    group('Expense limits','ఖర్చు పరిమితులు', CATEGORIES.expense, spentMap, '#8FA398', 'Spent this month · ఈ నెల ఖర్చు') +
+    group('Expense limits','ఖర్చు పరిమితులు', CATEGORIES.expense, spentMap, '#8FA398', 'Spent this month · ఈ నెల ఖర్చు', true) +
     group('Savings goals','పొదుపు లక్ష్యాలు', CATEGORIES.savings, savedMap, 'var(--accent)', 'Saved this month · ఈ నెల పొదుపు');
 
   // expense dots keep their per-category chart colors, set individually
   CATEGORIES.expense.forEach(cat=>{
     const rowEl = el.querySelector(`.budget-row[data-cat="${CSS.escape(cat)}"] .dot`);
     if(rowEl) rowEl.style.background = CATEGORY_COLOR[cat] || '#8FA398';
+  });
+  SUB_BUDGET_ITEMS.forEach(s=>{
+    const rowEl = el.querySelector(`.budget-row[data-cat="${CSS.escape(s.key)}"] .dot`);
+    if(rowEl) rowEl.style.background = CATEGORY_COLOR[s.afterCategory] || '#8FA398';
   });
 }
 async function saveBudgets(){
