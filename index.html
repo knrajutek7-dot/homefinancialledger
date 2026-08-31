@@ -104,6 +104,7 @@
   .stat.inc .v{color:var(--income);} .stat.exp .v{color:var(--danger);} .stat.sav .v{color:var(--accent);}
 
   h2.section{font-family:'Fraunces',serif; font-size:16px; font-weight:600; margin:22px 0 12px; display:flex; align-items:baseline; gap:8px;}
+  #budgetForm > h2.section:first-child{margin-top:0;}
   h2.section .bi{font-family:'Inter'; font-weight:400; font-size:11.5px; color:var(--text-soft);}
 
   /* ---------- Donut chart ---------- */
@@ -401,8 +402,8 @@
 
     <!-- BUDGET -->
     <div id="view-budget" class="view">
-      <h2 class="section" style="margin-top:0;">Monthly budget by category<span class="bi">నెలవారీ బడ్జెట్</span></h2>
-      <p style="font-size:12.5px; color:var(--text-soft); margin-top:-6px;">Set a limit for each category. Leave at 0 to skip tracking it. · ప్రతి వర్గానికి పరిమితి పెట్టండి</p>
+      <h2 class="section" style="margin-top:0;">Monthly targets<span class="bi">నెలవారీ లక్ష్యాలు</span></h2>
+      <p style="font-size:12.5px; color:var(--text-soft); margin-top:-6px;">Set a target for income, a limit for expenses, or a goal for savings. Leave at 0 to skip tracking it. · ఆదాయ లక్ష్యం, ఖర్చు పరిమితి లేదా పొదుపు లక్ష్యం పెట్టండి</p>
       <div id="budgetForm" style="padding-bottom:90px;"></div>
       <div class="budget-save-bar">
         <button class="primary" onclick="saveBudgets()">Save budget<span class="bi">బడ్జెట్ సేవ్ చేయి</span></button>
@@ -666,7 +667,7 @@ function lockApp(autoLocked){
 
 /* ---------- AUTO-LOCK AFTER INACTIVITY ---------- */
 let inactivityTimer = null;
-const INACTIVITY_LIMIT_MS = 1 * 60 * 1000; // 5 minutes
+const INACTIVITY_LIMIT_MS = 5 * 60 * 1000; // 5 minutes
 function resetInactivityTimer(){
   if(!currentUser) return; // nothing to protect while already locked
   clearTimeout(inactivityTimer);
@@ -1020,22 +1021,44 @@ function renderBudgetForm(){
   (DATA.expenses||[]).filter(r=>inCurrentMonth(r.Date)).forEach(r=>{
     spentMap[r.Category] = (spentMap[r.Category]||0) + Number(r.Amount||0);
   });
+  const receivedMap = {};
+  (DATA.income||[]).filter(r=>inCurrentMonth(r.Date)).forEach(r=>{
+    receivedMap[r.Source] = (receivedMap[r.Source]||0) + Number(r.Amount||0);
+  });
+  const savedMap = {};
+  (DATA.savings||[]).filter(r=>inCurrentMonth(r.Date)).forEach(r=>{
+    savedMap[r.Type] = (savedMap[r.Type]||0) + Number(r.Amount||0);
+  });
 
-  el.innerHTML = CATEGORIES.expense.map(cat=>{
-    const spent = spentMap[cat] || 0;
-    return `
-    <div class="budget-row" data-cat="${cat}">
-      <div class="row-top">
-        <span class="dot" style="background:${CATEGORY_COLOR[cat]||'#8FA398'}"></span>
-        <div><span class="name">${cat}</span><span class="bi">${CATEGORY_TE[cat]||''}</span></div>
-      </div>
-      <div class="amount-line">
-        <span class="rupee-prefix">₹</span>
-        <input type="number" min="0" step="1" value="${budgetMap[cat]||0}" class="budget-input">
-      </div>
-      ${spent>0 ? `<div class="spent-note">Spent this month: <b>${money(spent)}</b> · ఈ నెల ఖర్చు</div>` : ''}
-    </div>`;
-  }).join('');
+  function group(title, biTitle, categories, amountMap, dotColor, noteLabel){
+    const rows = categories.map(cat=>{
+      const amt = amountMap[cat] || 0;
+      return `
+      <div class="budget-row" data-cat="${cat}">
+        <div class="row-top">
+          <span class="dot" style="background:${dotColor}"></span>
+          <div><span class="name">${cat}</span><span class="bi">${CATEGORY_TE[cat]||''}</span></div>
+        </div>
+        <div class="amount-line">
+          <span class="rupee-prefix">₹</span>
+          <input type="number" min="0" step="1" value="${budgetMap[cat]||0}" class="budget-input">
+        </div>
+        ${amt>0 ? `<div class="spent-note">${noteLabel}: <b>${money(amt)}</b></div>` : ''}
+      </div>`;
+    }).join('');
+    return `<h2 class="section">${title}<span class="bi">${biTitle}</span></h2>${rows}`;
+  }
+
+  el.innerHTML =
+    group('Income targets','ఆదాయ లక్ష్యాలు', CATEGORIES.income, receivedMap, 'var(--income)', 'Received this month · ఈ నెల వచ్చింది') +
+    group('Expense limits','ఖర్చు పరిమితులు', CATEGORIES.expense, spentMap, '#8FA398', 'Spent this month · ఈ నెల ఖర్చు') +
+    group('Savings goals','పొదుపు లక్ష్యాలు', CATEGORIES.savings, savedMap, 'var(--accent)', 'Saved this month · ఈ నెల పొదుపు');
+
+  // expense dots keep their per-category chart colors, set individually
+  CATEGORIES.expense.forEach(cat=>{
+    const rowEl = el.querySelector(`.budget-row[data-cat="${CSS.escape(cat)}"] .dot`);
+    if(rowEl) rowEl.style.background = CATEGORY_COLOR[cat] || '#8FA398';
+  });
 }
 async function saveBudgets(){
   const rows = document.querySelectorAll('#budgetForm .budget-row');
